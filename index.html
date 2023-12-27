@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Code Label Generator for ASN in Paperless-ngx</title>
+    <link rel="canonical" href="https://tobiasmaier.info/asn-qr-code-label-generator/" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+      defer
+    ></script>
+    <style>
+      @media print {
+        /* See https://caniuse.com/css-paged-media */
+        @page {
+          /* Remove default margin set by the browser */
+          margin: 0mm;
+          size: A4;
+        }
+      }
+    </style>
+  </head>
+  <body class="print:p-0" x-data="qrCodeApp()">
+    <div class="container mx-auto print:hidden">
+      <h1 class="mb-4 text-xl font-bold print:hidden">
+        QR Code Label Generator for
+        <abbr title="Archive Serial Number">ASN</abbr> in Paperless-ngx
+      </h1>
+      <div
+        class="prose prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 mb-4 print:hidden"
+      >
+        <p>
+          This tool generates QR code labels for the
+          <a
+            href="https://docs.paperless-ngx.com/advanced_usage/#archive-serial-number-assignment"
+            >Archive Serial Number (ASN)</a
+          >
+          feature in
+          <a href="https://docs.paperless-ngx.com/">Paperless-ngx</a>.
+        </p>
+
+        <p>
+          The <abbr title="Archive Serial Number">ASN</abbr> feature allows you
+          to assign a unique serial number to each document in your archive.
+          This is useful if you want to refer to a document in a paperless
+          workflow. For example, you can print the
+          <abbr title="Archive Serial Number">ASN</abbr>
+          on a document and then use it to search for the document in
+          Paperless-ngx.
+        </p>
+
+        <p>
+          This tool generates QR code labels for the
+          <abbr title="Archive Serial Number">ASN</abbr> feature. You can
+          generate labels for up to 189 documents at once. The labels are
+          formatted to <strong>fit on Avery L4731REV-25 labels</strong>.
+        </p>
+
+        <p>
+          To use this tool, enter the start number, prefix, and number of
+          leading zeros. Then click the "Regenerate Labels" button. The labels
+          will be generated and displayed below. You can then print the labels
+          by clicking the "Print Labels" button.
+        </p>
+      </div>
+      <form class="mb-8 print:hidden">
+        <!-- User Input Fields -->
+        <div class="mb-5 grid grid-cols-1 gap-5 md:grid-cols-2">
+          <div>
+            <label
+              for="startNumber"
+              class="mb-2 block text-sm font-medium text-gray-900"
+              >Start Number</label
+            >
+            <input
+              type="number"
+              id="startNumber"
+              x-model="startNumber"
+              min="1"
+              step="1"
+              value="1"
+              class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+            />
+            <div class="mt-1">
+              <p
+                class="prose prose-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 max-w-none"
+              >
+                The number of labels generated will be 7 x 27 = 189. This means
+                the <strong>next batch</strong> of labels should
+                <strong
+                  >start with
+                  <span x-text="parseInt(startNumber, 10) + 189"
+                    >190</span
+                  ></strong
+                >.
+              </p>
+            </div>
+          </div>
+          <div>
+            <label
+              for="prefix"
+              class="mb-2 block text-sm font-medium text-gray-900"
+              >Prefix</label
+            >
+            <input
+              type="text"
+              id="prefix"
+              x-model="prefix"
+              value="ASN"
+              class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+            />
+            <div class="mt-1">
+              <p
+                class="prose prose-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 max-w-none"
+              >
+                If you change this, <strong>update the prefix</strong> in
+                Paperless-ngx accordingly via
+                <a
+                  href="https://docs.paperless-ngx.com/configuration/#PAPERLESS_CONSUMER_ASN_BARCODE_PREFIX"
+                  ><code>PAPERLESS_CONSUMER_ASN_BARCODE_PREFIX</code></a
+                >.
+              </p>
+            </div>
+          </div>
+          <div>
+            <label
+              for="leadingZeros"
+              class="mb-2 block text-sm font-medium text-gray-900"
+              >Number of Leading Zeros</label
+            >
+            <input
+              type="number"
+              id="leadingZeros"
+              x-model="leadingZeros"
+              value="5"
+              min="0"
+              class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <div class="flex items-start">
+              <div class="flex h-5 items-center">
+                <input
+                  type="checkbox"
+                  id="borderToggle"
+                  x-model="borderToggle"
+                  class="focus:ring-3 h-4 w-4 rounded border border-gray-300 bg-gray-50 focus:ring-blue-300"
+                />
+              </div>
+              <label
+                for="borderToggle"
+                class="ms-2 text-sm font-medium text-gray-900"
+                >Show Border</label
+              >
+            </div>
+            <div class="mt-1">
+              <p
+                class="prose prose-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 max-w-none"
+              >
+                This may be useful for debugging or to calibrate the print out.
+              </p>
+            </div>
+          </div>
+        </div>
+        <button
+          @click.prevent="generateLabels()"
+          class="w-full rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 sm:w-auto"
+        >
+          Regenerate Labels
+        </button>
+        <button
+          @click.prevent="printLabels()"
+          class="w-full rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 sm:w-auto"
+        >
+          Print Labels
+        </button>
+      </form>
+    </div>
+
+    <div
+      class="w-[210mm] border px-[9mm] py-[13.5mm] print:w-full print:border-0"
+    >
+      <!-- Display QR Code Labels -->
+      <ol class="grid grid-cols-7 gap-x-[2.5mm]">
+        <template x-for="label in labels">
+          <li
+            class="flex h-[10mm] w-[25.4mm] items-center border p-1"
+            :class="{'border-transparent': !borderToggle}"
+          >
+            <img
+              :src="label.qrCodeUrl"
+              alt=""
+              width="100"
+              height="100"
+              class="mr-[2mm] aspect-square h-[8mm] w-[8mm] flex-none"
+              referrerpolicy="no-referrer"
+            />
+            <div
+              class="flex-grow text-sm"
+              style="font-size: 2mm"
+              x-text="label.text"
+            ></div>
+          </li>
+        </template>
+      </ol>
+    </div>
+
+    <footer class="mt-8 bg-gray-200 py-4 text-center print:hidden">
+      <p>
+        &copy; 2023
+        <a
+          href="https://tobiasmaier.info"
+          class="text-blue-600 underline hover:text-blue-700"
+          >Tobias L. Maier</a
+        >. All rights reserved. Licensed under the
+        <a
+          href="https://www.gnu.org/licenses/agpl-3.0.html"
+          title="GNU Affero General Public License"
+          class="text-blue-600 underline hover:text-blue-700"
+          >AGPL v3.0</a
+        >.  
+        <a
+          href="https://github.com/tmaier/asn-qr-code-label-generator"
+          class="text-blue-600 underline hover:text-blue-700"
+          >Contribute via GitHub</a
+        >
+      </p>
+    </footer>
+
+    <script>
+      function qrCodeApp() {
+        return {
+          startNumber: 1,
+          prefix: "ASN",
+          leadingZeros: 4,
+          borderToggle: false,
+          labels: [],
+
+          generateLabels() {
+            this.labels = [];
+            let totalLabels = 7 * 27; // 7 columns x 27 rows
+            let startNumberInt = parseInt(this.startNumber, 10); // Ensure startNumber is an integer
+            let leadingZerosInt = parseInt(this.leadingZeros, 10); // Ensure leadingZeros is an integer
+            for (let i = 0; i < totalLabels; i++) {
+              let number = startNumberInt + i;
+              let paddedNumber = number
+                .toString()
+                .padStart(leadingZerosInt + 1, "0");
+              let text = this.prefix + paddedNumber;
+              // See https://developers.google.com/chart/infographics/docs/qr_codes
+              let qrCodeUrl = `https://chart.googleapis.com/chart?cht=qr&chl=${encodeURIComponent(
+                text
+              )}&chs=300x300&chld=L|0`;
+
+              this.labels.push({ qrCodeUrl, text });
+            }
+          },
+          printLabels() {
+            window.print();
+          },
+          init() {
+            this.generateLabels();
+          },
+        };
+      }
+    </script>
+  </body>
+</html>
