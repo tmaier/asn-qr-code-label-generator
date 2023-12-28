@@ -76,7 +76,7 @@
           header and footer of the browser.
         </p>
       </div>
-      <form class="mb-8 print:hidden">
+      <form @submit.prevent="generateLabels()" class="mb-8 print:hidden">
         <!-- User Input Fields -->
         <div class="mb-5 grid grid-cols-1 gap-5 md:grid-cols-2">
           <div>
@@ -89,6 +89,7 @@
               type="number"
               id="startNumber"
               x-model="startNumber"
+              required
               min="1"
               step="1"
               value="1"
@@ -119,6 +120,7 @@
               type="text"
               id="prefix"
               x-model="prefix"
+              required
               value="ASN"
               class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
             />
@@ -145,6 +147,7 @@
               type="number"
               id="leadingZeros"
               x-model="leadingZeros"
+              required
               value="5"
               min="0"
               class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
