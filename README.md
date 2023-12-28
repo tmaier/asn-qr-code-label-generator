@@ -22,9 +22,12 @@ The application currently supports the following label formats:
 The application currently has the following limitations:
 
 - The application is currently only available in English.
+  This is considered a non-issue, as the application is designed to be self-explanatory.
 - The application currently only supports the Avery L4731REV-25 label format.
+  Contributions for additional label formats are welcome.
 - The application only supports Google Chrome and Chromium-based browsers, such as Microsoft Edge. And partially Firefox.
   This limitation is due to the use of the [CSS `@page` rule](https://developer.mozilla.org/en-US/docs/Web/CSS/@page) for printing.
+  Contributions for additional browser support are welcome.
 
 ### Key Design Decisions
 
