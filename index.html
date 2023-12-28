@@ -208,12 +208,18 @@
               alt=""
               width="100"
               height="100"
-              class="mr-[2mm] aspect-square h-[8mm] w-[8mm] flex-none"
+              class="mr-[1mm] aspect-square h-[8mm] w-[8mm] flex-none"
               referrerpolicy="no-referrer"
             />
             <div
-              class="flex-grow text-sm"
-              style="font-size: 2mm"
+              class="flex-grow"
+              :class="{
+                'text-[3.9mm]': label.text.length <= 6,
+                'text-[3.2mm]': label.text.length == 7,
+                'text-[2.7mm]': label.text.length == 8,
+                'text-[2.4mm]': label.text.length == 9,
+                'text-[2.1mm]': label.text.length >= 10,
+              }"
               x-text="label.text"
             ></div>
           </li>
