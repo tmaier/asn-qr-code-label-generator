@@ -269,10 +269,8 @@
                 .toString()
                 .padStart(leadingZerosInt + 1, "0");
               let text = this.prefix + paddedNumber;
-              // See https://developers.google.com/chart/infographics/docs/qr_codes
-              let qrCodeUrl = `https://chart.googleapis.com/chart?cht=qr&chl=${encodeURIComponent(
-                text
-              )}&chs=300x300&chld=L|0`;
+              // See https://goqr.me/api/doc/create-qr-code/
+              let qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${text}`;
 
               this.labels.push({ qrCodeUrl, text });
             }
