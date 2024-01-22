@@ -270,7 +270,9 @@
                 .padStart(leadingZerosInt + 1, "0");
               let text = this.prefix + paddedNumber;
               // See https://goqr.me/api/doc/create-qr-code/
-              let qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(text)}`;
+              let qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+                text
+              )}`;
 
               this.labels.push({ qrCodeUrl, text });
             }
