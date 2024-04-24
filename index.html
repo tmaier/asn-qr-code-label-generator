@@ -199,29 +199,31 @@
       <!-- Display QR Code Labels -->
       <ol class="grid grid-cols-7 gap-x-[2.5mm]">
         <template x-for="label in labels">
-          <li
-            class="flex h-[10mm] w-[25.4mm] items-center border-[0.5mm] p-[0.5mm] odd:border-blue-500 even:border-red-300"
-            :class="{'even:border-transparent odd:border-transparent': !borderToggle}"
-          >
-            <img
-              :src="label.qrCodeUrl"
-              alt=""
-              width="100"
-              height="100"
-              class="mr-[1mm] aspect-square h-[8mm] w-[8mm] flex-none"
-              referrerpolicy="no-referrer"
-            />
+          <li class="flex h-[10mm] w-[25.4mm] items-center">
             <div
-              class="flex-grow"
-              :class="{
+              class="border-[0.5mm] p-[0.5mm] odd:border-blue-500 even:border-red-300"
+              :class="{'even:border-transparent odd:border-transparent': !borderToggle}"
+            >
+              <img
+                :src="label.qrCodeUrl"
+                alt=""
+                width="100"
+                height="100"
+                class="mr-[1mm] aspect-square h-[8mm] w-[8mm] flex-none"
+                referrerpolicy="no-referrer"
+              />
+              <div
+                class="flex-grow"
+                :class="{
                 'text-[3.9mm]': label.text.length <= 6,
                 'text-[3.2mm]': label.text.length == 7,
                 'text-[2.7mm]': label.text.length == 8,
                 'text-[2.4mm]': label.text.length == 9,
                 'text-[2.1mm]': label.text.length >= 10,
               }"
-              x-text="label.text"
-            ></div>
+                x-text="label.text"
+              ></div>
+            </div>
           </li>
         </template>
       </ol>
