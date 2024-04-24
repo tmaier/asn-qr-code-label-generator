@@ -199,9 +199,9 @@
       <!-- Display QR Code Labels -->
       <ol class="grid grid-cols-7 gap-x-[2.5mm]">
         <template x-for="label in labels">
-          <li class="flex h-[10mm] w-[25.4mm] items-center">
+          <li class="h-[10mm] w-[25.4mm]">
             <div
-              class="border-[0.5mm] p-[0.5mm] odd:border-blue-500 even:border-red-300"
+              class="flex h-[9mm] w-[24.4mm] items-center border-[0.5mm] odd:border-blue-500 even:border-red-300"
               :class="{'even:border-transparent odd:border-transparent': !borderToggle}"
             >
               <img
@@ -209,7 +209,7 @@
                 alt=""
                 width="100"
                 height="100"
-                class="mr-[1mm] aspect-square h-[8mm] w-[8mm] flex-none"
+                class="mr-[0.5mm] aspect-square h-[9mm] w-[9mm] flex-none"
                 referrerpolicy="no-referrer"
               />
               <div
