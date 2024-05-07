@@ -8,6 +8,7 @@
       rel="canonical"
       href="https://tobiasmaier.info/asn-qr-code-label-generator/"
     />
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
@@ -204,14 +205,10 @@
               class="flex h-[9mm] w-[24.4mm] items-center border-[0.5mm] odd:border-blue-500 even:border-red-300"
               :class="{'even:border-transparent odd:border-transparent': !borderToggle}"
             >
-              <img
-                :src="label.qrCodeUrl"
-                alt=""
-                width="100"
-                height="100"
+              <div
+                x-init="new QRCode($el, { text: label.text, correctLevel: QRCode.CorrectLevel.L})"
                 class="mr-[0.5mm] aspect-square h-[9mm] w-[9mm] flex-none"
-                referrerpolicy="no-referrer"
-              />
+              ></div>
               <div
                 class="flex-grow"
                 :class="{
@@ -271,12 +268,8 @@
                 .toString()
                 .padStart(leadingZerosInt + 1, "0");
               let text = this.prefix + paddedNumber;
-              // See https://goqr.me/api/doc/create-qr-code/
-              let qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
-                text
-              )}`;
 
-              this.labels.push({ qrCodeUrl, text });
+              this.labels.push({ text });
             }
           },
           printLabels() {
