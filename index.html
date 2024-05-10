@@ -206,7 +206,7 @@
               :class="{'even:border-transparent odd:border-transparent': !borderToggle}"
             >
               <div
-                x-init="new QRCode($el, { text: label.text, correctLevel: QRCode.CorrectLevel.L})"
+                x-effect="$el.innerHTML=''; new QRCode($el, { text: label.text, correctLevel: QRCode.CorrectLevel.L});"
                 class="mr-[0.5mm] aspect-square h-[9mm] w-[9mm] flex-none"
               ></div>
               <div
