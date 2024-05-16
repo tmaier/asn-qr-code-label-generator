@@ -18,7 +18,7 @@
         /* See https://caniuse.com/css-paged-media */
         @page {
           /* Remove default margin set by the browser */
-          margin: 0mm;
+          margin: 0;
           size: A4;
         }
       }
@@ -56,8 +56,7 @@
         <p>
           This tool generates QR code labels for the
           <abbr title="Archive Serial Number">ASN</abbr> feature. You can
-          generate labels for up to 189 documents at once. The labels are
-          formatted to <strong>fit on Avery L4731REV-25 labels</strong>.
+          generate labels for up to 189 (<strong>Avery L4731REV-25</strong>) or 65 (<strong>Avery 3666</strong>) documents at once.
         </p>
 
         <p>
@@ -99,14 +98,21 @@
               <p
                 class="prose prose-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 max-w-none"
               >
-                The number of labels generated will be 7 x 27 = 189. This means
+                The number of labels generated will be 7 x 27 = 189 (Avery L4731REV-25) or 5 x 13 = 65 (Avery 3666). This means
                 the <strong>next batch</strong> of labels should
                 <strong
                   >start with
                   <span x-text="parseInt(startNumber, 10) + 189"
                     >190</span
                   ></strong
-                >.
+                >
+                or
+                <strong
+                > with
+                  <span x-text="parseInt(startNumber, 10) + 65"
+                  >190</span
+                  ></strong
+                > respectively.
               </p>
             </div>
           </div>
@@ -154,6 +160,17 @@
             />
           </div>
           <div>
+            <label
+              for="labelToPrint"
+              class="mb-2 block text-sm font-medium text-gray-900"
+            >Chose Labels</label
+            >
+            <select id="labelToPrint" x-model="labelToPrint" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500">
+              <option value="L4731REV-25">Avery L4731REV-25</option>
+              <option value="3666">Avery 3666</option>
+            </select>
+          </div>
+          <div>
             <div class="flex items-start">
               <div class="flex h-5 items-center">
                 <input
@@ -166,7 +183,7 @@
               <label
                 for="borderToggle"
                 class="ms-2 text-sm font-medium text-gray-900"
-                >Show Border</label
+              >Show Border</label
               >
             </div>
             <div class="mt-1">
@@ -177,6 +194,7 @@
               </p>
             </div>
           </div>
+
         </div>
         <button
           @click.prevent="generateLabels()"
@@ -194,7 +212,7 @@
     </div>
 
     <div
-      class="container mx-auto w-[210mm] border px-[8.45mm] py-[13.5mm] print:w-full print:max-w-full print:border-0"
+      class="container mx-auto w-[210mm] border px-[8.45mm] py-[13.5mm] print:w-full print:max-w-full print:border-0 container-L4731REV-25"
     >
       <!-- Display QR Code Labels -->
       <ol class="grid grid-cols-7 gap-x-[2.55mm]">
@@ -220,6 +238,42 @@
                 'text-[2.7mm]': label.text.length == 8,
                 'text-[2.4mm]': label.text.length == 9,
                 'text-[2.1mm]': label.text.length >= 10,
+              }"
+                x-text="label.text"
+              ></div>
+            </div>
+          </li>
+        </template>
+      </ol>
+    </div>
+
+    <div
+      class="container mx-auto w-[210mm] border px-[11.19mm] py-[10.7mm] print:w-full print:max-w-full print:border-0 container-3666"
+    >
+      <!-- Display QR Code Labels -->
+      <ol class="grid grid-cols-5 gap-x-[2.5mm]">
+        <template x-for="label in labels">
+          <li class="h-[21.2mm] w-[38mm]">
+            <div
+              class="flex h-[20.2mm] w-[37mm] items-center border-[0.5mm] odd:border-blue-500 even:border-red-300"
+              :class="{'even:border-transparent odd:border-transparent': !borderToggle}"
+            >
+              <img
+                :src="label.qrCodeUrl"
+                alt=""
+                width="100"
+                height="100"
+                class="mr-[0.5mm] aspect-square h-[15.2mm] w-[15.2mm] flex-none"
+                referrerpolicy="no-referrer"
+              />
+              <div
+                class="flex-grow"
+                :class="{
+                'text-[5mm]': label.text.length <= 6,
+                'text-[4.4mm]': label.text.length == 7,
+                'text-[4mm]': label.text.length == 8,
+                'text-[3.4mm]': label.text.length == 9,
+                'text-[3.1mm]': label.text.length >= 10,
               }"
                 x-text="label.text"
               ></div>
@@ -255,14 +309,28 @@
       function qrCodeApp() {
         return {
           startNumber: 1,
+          labelToPrint: "L4731REV-25",
           prefix: "ASN",
           leadingZeros: 4,
           borderToggle: false,
           labels: [],
 
           generateLabels() {
+            const containers = {
+              "L4731REV-25": document.getElementsByClassName('container-L4731REV-25'),
+              "3666": document.getElementsByClassName('container-3666')
+            };
+
+            Object.values(containers).forEach(container => {
+              Array.from(container).forEach(div => div.classList.add('hidden'));
+            });
+
+            if (containers[this.labelToPrint]) {
+              Array.from(containers[this.labelToPrint]).forEach(div => div.classList.remove('hidden'));
+            }
+
             this.labels = [];
-            let totalLabels = 7 * 27; // 7 columns x 27 rows
+            let totalLabels = this.labelToPrint === "L4731REV-25" ? 7 * 27 : this.labelToPrint === "3666" ? 5 * 13 : 7 * 27;
             let startNumberInt = parseInt(this.startNumber, 10); // Ensure startNumber is an integer
             let leadingZerosInt = parseInt(this.leadingZeros, 10); // Ensure leadingZeros is an integer
             for (let i = 0; i < totalLabels; i++) {
