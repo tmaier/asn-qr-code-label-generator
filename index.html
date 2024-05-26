@@ -161,11 +161,11 @@
           </div>
           <div>
             <label
-              for="labelToPrint"
+              for="selectedLabel"
               class="mb-2 block text-sm font-medium text-gray-900"
             >Chose Labels</label
             >
-            <select id="labelToPrint" x-model="labelToPrint" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500">
+            <select id="selectedLabel" x-model="selectedLabel" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500">
               <option value="L4731REV-25">Avery L4731REV-25</option>
               <option value="3666">Avery 3666</option>
             </select>
@@ -190,7 +190,7 @@
               <p
                 class="prose prose-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 max-w-none"
               >
-                This may be useful for debugging or to calibrate the print out.
+                This may be useful for debugging or to calibrate the print-out.
               </p>
             </div>
           </div>
@@ -212,14 +212,15 @@
     </div>
 
     <div
-      class="container mx-auto w-[210mm] border px-[8.45mm] py-[13.5mm] print:w-full print:max-w-full print:border-0 container-L4731REV-25"
+      class="container mx-auto w-[210mm] border print:w-full print:max-w-full print:border-0"
+      :class="`px-[${currentConfig.px}mm] py-[${currentConfig.py}mm]`"
     >
       <!-- Display QR Code Labels -->
-      <ol class="grid grid-cols-7 gap-x-[2.55mm]">
+      <ol class="grid" :class="`grid-cols-${currentConfig.cols} gapx-[${currentConfig.gapx}mm]`">
         <template x-for="label in labels">
-          <li class="h-[10mm] w-[25.4mm]">
+          <li :class="`h-[${currentConfig.labelHeight}mm] w-[${currentConfig.labelWidth}mm]`">
             <div
-              class="flex h-[9mm] w-[24.4mm] items-center border-[0.5mm] odd:border-blue-500 even:border-red-300"
+              class="flex mx-[1mm] my-[1mm] items-center border-[0.5mm] odd:border-blue-500 even:border-red-300"
               :class="{'even:border-transparent odd:border-transparent': !borderToggle}"
             >
               <img
@@ -227,54 +228,13 @@
                 alt=""
                 width="100"
                 height="100"
-                class="mr-[0.5mm] aspect-square h-[9mm] w-[9mm] flex-none"
+                class="mr-[0.5mm] aspect-square flex-none"
+                :class="`h-[${currentConfig.codeHeight}mm] w-[${currentConfig.codeWidth}mm]`"
                 referrerpolicy="no-referrer"
               />
               <div
                 class="flex-grow"
-                :class="{
-                'text-[3.9mm]': label.text.length <= 6,
-                'text-[3.2mm]': label.text.length == 7,
-                'text-[2.7mm]': label.text.length == 8,
-                'text-[2.4mm]': label.text.length == 9,
-                'text-[2.1mm]': label.text.length >= 10,
-              }"
-                x-text="label.text"
-              ></div>
-            </div>
-          </li>
-        </template>
-      </ol>
-    </div>
-
-    <div
-      class="container mx-auto w-[210mm] border px-[11.19mm] py-[10.7mm] print:w-full print:max-w-full print:border-0 container-3666"
-    >
-      <!-- Display QR Code Labels -->
-      <ol class="grid grid-cols-5 gap-x-[2.5mm]">
-        <template x-for="label in labels">
-          <li class="h-[21.2mm] w-[38mm]">
-            <div
-              class="flex h-[20.2mm] w-[37mm] items-center border-[0.5mm] odd:border-blue-500 even:border-red-300"
-              :class="{'even:border-transparent odd:border-transparent': !borderToggle}"
-            >
-              <img
-                :src="label.qrCodeUrl"
-                alt=""
-                width="100"
-                height="100"
-                class="mr-[0.5mm] aspect-square h-[15.2mm] w-[15.2mm] flex-none"
-                referrerpolicy="no-referrer"
-              />
-              <div
-                class="flex-grow"
-                :class="{
-                'text-[5mm]': label.text.length <= 6,
-                'text-[4.4mm]': label.text.length == 7,
-                'text-[4mm]': label.text.length == 8,
-                'text-[3.4mm]': label.text.length == 9,
-                'text-[3.1mm]': label.text.length >= 10,
-              }"
+                :class="getTextSizeClass(label.text.length)"
                 x-text="label.text"
               ></div>
             </div>
@@ -308,29 +268,61 @@
     <script>
       function qrCodeApp() {
         return {
+          selectedLabel: "L4731REV-25",
           startNumber: 1,
-          labelToPrint: "L4731REV-25",
           prefix: "ASN",
           leadingZeros: 4,
           borderToggle: false,
           labels: [],
-
+          configs: {
+            "L4731REV-25": {
+              px: 8.45,
+              py: 13.5,
+              cols: 7,
+              rows: 27,
+              gapx: 2.55,
+              labelHeight: 10,
+              labelWidth: 25.4,
+              codeHeight: 9,
+              codeWidth: 9,
+              textSize_6: 3.9,
+              textSize_7: 3.2,
+              textSize_8: 2.7,
+              textSize_9: 2.4,
+              textSize_10: 2.1
+            },
+            "3666": {
+              px: 11.19,
+              py: 10.7,
+              cols: 5,
+              rows: 13,
+              gapx: 2.5,
+              labelHeight: 21.1,
+              labelWidth: 38,
+              codeHeight: 15.2,
+              codeWidth: 15.2,
+              textSize_6: 5,
+              textSize_7: 4.4,
+              textSize_8: 4,
+              textSize_9: 3.4,
+              textSize_10: 3.1
+            },
+          },
+          get currentConfig() {
+            return this.configs[this.selectedLabel];
+          },
+          getTextSizeClass(textLength) {
+            const { textSize_6, textSize_7, textSize_8, textSize_9, textSize_10 } = this.currentConfig;
+            if (textLength <= 6) return `text-[${textSize_6}mm]`;
+            if (textLength === 7) return `text-[${textSize_7}mm]`;
+            if (textLength === 8) return `text-[${textSize_8}mm]`;
+            if (textLength === 9) return `text-[${textSize_9}mm]`;
+            return `text-[${textSize_10}mm]`;
+          },
           generateLabels() {
-            const containers = {
-              "L4731REV-25": document.getElementsByClassName('container-L4731REV-25'),
-              "3666": document.getElementsByClassName('container-3666')
-            };
-
-            Object.values(containers).forEach(container => {
-              Array.from(container).forEach(div => div.classList.add('hidden'));
-            });
-
-            if (containers[this.labelToPrint]) {
-              Array.from(containers[this.labelToPrint]).forEach(div => div.classList.remove('hidden'));
-            }
-
             this.labels = [];
-            let totalLabels = this.labelToPrint === "L4731REV-25" ? 7 * 27 : this.labelToPrint === "3666" ? 5 * 13 : 7 * 27;
+            const { cols, rows } = this.currentConfig;
+            const totalLabels = cols * rows;
             let startNumberInt = parseInt(this.startNumber, 10); // Ensure startNumber is an integer
             let leadingZerosInt = parseInt(this.leadingZeros, 10); // Ensure leadingZeros is an integer
             for (let i = 0; i < totalLabels; i++) {
