@@ -8,7 +8,7 @@
       rel="canonical"
       href="https://tobiasmaier.info/asn-qr-code-label-generator/"
     />
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
@@ -205,10 +205,10 @@
               class="flex h-[9mm] w-[24.4mm] items-center border-[0.5mm] odd:border-blue-500 even:border-red-300"
               :class="{'even:border-transparent odd:border-transparent': !borderToggle}"
             >
-              <div
-                x-effect="$el.innerHTML=''; new QRCode($el, { text: label.text, correctLevel: QRCode.CorrectLevel.L});"
+              <img
+                x-effect="generateQrCode($el, label.text);"
                 class="mr-[0.5mm] aspect-square h-[9mm] w-[9mm] flex-none"
-              ></div>
+              ></img>
               <div
                 class="flex-grow"
                 :class="{
@@ -271,6 +271,9 @@
 
               this.labels.push({ text });
             }
+          },
+          generateQrCode(element, value) {
+            new QRious({ element, value });
           },
           printLabels() {
             window.print();
