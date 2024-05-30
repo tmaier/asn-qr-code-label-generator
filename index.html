@@ -201,7 +201,7 @@
         <template x-for="label in labels">
           <li class="h-[10mm] w-[25.4mm]">
             <div
-              class="flex h-[9mm] w-[24.4mm] items-center border-[0.5mm] odd:border-blue-500 even:border-red-300"
+              class="flex justify-evenly h-[9mm] w-[24.4mm] items-center border-[0.5mm] odd:border-blue-500 even:border-red-300"
               :class="{'even:border-transparent odd:border-transparent': !borderToggle}"
             >
               <img
@@ -213,16 +213,25 @@
                 referrerpolicy="no-referrer"
               />
               <div
-                class="flex-grow"
+                class="flex-none pr-[2mm]" align="center"
+                ><div
                 :class="{
-                'text-[3.9mm]': label.text.length <= 6,
-                'text-[3.2mm]': label.text.length == 7,
-                'text-[2.7mm]': label.text.length == 8,
-                'text-[2.4mm]': label.text.length == 9,
-                'text-[2.1mm]': label.text.length >= 10,
+                'text-[3.3mm]': label.prefix.length <= 3,
+                'text-[2.9mm]': label.prefix.length == 4,
+                'text-[2.4mm]': label.prefix.length == 5,
+                'text-[1.9mm]': label.prefix.length == 6,
+                'text-[1.5mm]': label.prefix.length >= 7,
               }"
-                x-text="label.text"
-              ></div>
+                x-text="label.prefix"
+                ></div><div
+                :class="{
+                'text-[2.9mm]': label.paddedNumber.length <= 4,
+                'text-[2.4mm]': label.paddedNumber.length == 5,
+                'text-[1.9mm]': label.paddedNumber.length == 6,
+                'text-[1.5mm]': label.paddedNumber.length >= 7,
+              }"
+                x-text="label.paddedNumber"
+              ></div></div>
             </div>
           </li>
         </template>
@@ -272,11 +281,11 @@
                 .padStart(leadingZerosInt + 1, "0");
               let text = this.prefix + paddedNumber;
               // See https://goqr.me/api/doc/create-qr-code/
-              let qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+              let qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&qzone=4&bgcolor=fff&data=${encodeURIComponent(
                 text
               )}`;
 
-              this.labels.push({ qrCodeUrl, text });
+              this.labels.push({ qrCodeUrl, text, prefix: this.prefix, paddedNumber });
             }
           },
           printLabels() {
