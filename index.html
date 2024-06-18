@@ -245,7 +245,7 @@
                 'text-[2.4mm]': label.text.length == 9,
                 'text-[2.1mm]': label.text.length >= 10,
               }"
-                x-text="label.text"
+                x-text="label.qrCodeLabel"
               ></div>
             </div>
           </li>
@@ -287,22 +287,22 @@
 
           generateLabels() {
             this.labels = [];
-            let totalLabels = 7 * 27; // 7 columns x 27 rows
-            let startNumberInt = parseInt(this.startNumber, 10); // Ensure startNumber is an integer
-            let leadingZerosInt = parseInt(this.leadingZeros, 10); // Ensure leadingZeros is an integer
+            const totalLabels = 7 * 27; // 7 columns x 27 rows
+            const startNumberInt = parseInt(this.startNumber, 10); // Ensure startNumber is an integer
+            const leadingZerosInt = parseInt(this.leadingZeros, 10); // Ensure leadingZeros is an integer
             for (let i = 0; i < totalLabels; i++) {
-              let number = startNumberInt + i;
-              let paddedNumber = number
+              const number = startNumberInt + i;
+              const paddedNumber = number
                 .toString()
                 .padStart(leadingZerosInt + 1, "0");
-              let text = this.printPrefix ? this.prefix + paddedNumber : paddedNumber;
-              let qrCode = this.prefix + paddedNumber;
+              const qrCodeContent = this.prefix + paddedNumber;
+              const qrCodeLabel = this.printPrefix ? qrCodeContent : paddedNumber;
               // See https://goqr.me/api/doc/create-qr-code/
-              let qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
-                qrCode
+              const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+                qrCodeContent
               )}`;
 
-              this.labels.push({ qrCodeUrl, text });
+              this.labels.push({ qrCodeUrl, qrCodeLabel });
             }
           },
           printLabels() {
