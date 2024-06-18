@@ -177,6 +177,30 @@
               </p>
             </div>
           </div>
+          <div>
+            <div class="flex items-start">
+              <div class="flex h-5 items-center">
+                <input
+                  type="checkbox"
+                  id="printPrefix"
+                  x-model="printPrevix"
+                  class="focus:ring-3 h-4 w-4 rounded border border-gray-300 bg-gray-50 focus:ring-blue-300"
+                />
+              </div>
+              <label
+                for="printPrefix"
+                class="ms-2 text-sm font-medium text-gray-900"
+                >Print Prefix</label
+              >
+            </div>
+            <div class="mt-1">
+              <p
+                class="prose prose-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 max-w-none"
+              >
+                Enables printing the prefix as text
+              </p>
+            </div>
+          </div>
         </div>
         <button
           @click.prevent="generateLabels()"
@@ -258,6 +282,7 @@
           prefix: "ASN",
           leadingZeros: 4,
           borderToggle: false,
+          printPrefix: true,
           labels: [],
 
           generateLabels() {
@@ -270,7 +295,8 @@
               let paddedNumber = number
                 .toString()
                 .padStart(leadingZerosInt + 1, "0");
-              let text = this.prefix + paddedNumber;
+              let text = this.printPrefix ? this.prefix + paddedNumber : paddedNumber;
+              let qrCode = this.prefix + paddedNumber;
               // See https://goqr.me/api/doc/create-qr-code/
               let qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
                 text
