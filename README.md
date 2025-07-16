@@ -17,6 +17,18 @@ The application currently supports the following label formats:
 
 - Avery L4731REV-25 (See [UK shop](https://www.avery.co.uk/product/mini-multipurpose-labels-l4731rev-25), [DE shop](https://www.avery-zweckform.com/produkt/universal-etiketten-l4731rev-25))
 
+### Features
+
+- Generate up to 189 QR code labels in a batch
+- Customize start number, prefix, and number formatting
+- Adjustable layout options for precise printer alignment:
+  - Vertical Offset (mm): shifts the label grid up or down
+  - Horizontal Offset (mm): shifts the label grid left or right
+  - Label Height (mm): controls the vertical size of each label
+  - Content Scale (%): scales QR code and text inside each label
+  - Show Border: toggles visible borders to help with calibration
+- Print-ready formatting for A4 label sheets
+
 ### Limitations
 
 The application currently has the following limitations:
