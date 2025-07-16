@@ -68,6 +68,16 @@
         </p>
 
         <p>
+          To fine-tune the label alignment for your specific printer or label sheet, you can adjust the following parameters: 
+          <strong>Vertical Offset</strong> moves the entire label grid up or down on the page, while 
+          <strong>Horizontal Offset</strong> shifts it left or right. 
+          <strong>Label Height</strong> controls the height of each individual label, and 
+          <strong>Content Scale</strong> resizes the text and QR code inside each label. 
+          The <strong>Show Border</strong> option adds a visible border around each label, which can help with calibration and print alignment.
+          Use these settings to ensure the labels are printed accurately on your sheet.
+        </p>
+
+        <p>
           One <strong>known limitation of this tool</strong> is that it
           <strong>only works on Google Chrome and possibly Firefox</strong>.
           This is because it uses the
@@ -153,6 +163,18 @@
               class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
+          <div></div>
+          <div>            
+            
+            <div class="mt-1">
+              <p
+                class="prose prose-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 max-w-none"
+              >
+                The following parameters are useful for debugging or to calibrate the print out.
+              </p>
+            </div>
+          
+          </div>
           <div>
             <div class="flex items-start">
               <div class="flex h-5 items-center">
@@ -169,14 +191,54 @@
                 >Show Border</label
               >
             </div>
-            <div class="mt-1">
+
+          </div>
+          
+          <div>
+            <label for="verticalOffset" class="block text-sm font-medium">Vertical Offset (mm)</label>
+            <input type="number" id="verticalOffset" x-model="verticalOffset" step="0.1" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500" />
+             <div class="mt-1">
               <p
                 class="prose prose-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 max-w-none"
               >
-                This may be useful for debugging or to calibrate the print out.
+                Adjusts the vertical position of the entire label sheet on the page. Use this if the labels are printing too high or too low. 
               </p>
             </div>
           </div>
+          <div>
+            <label for="horizontalOffset" class="block text-sm font-medium">Horizontal Offset (mm)</label>
+            <input type="number" id="horizontalOffset" x-model="horizontalOffset" step="0.1" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500" />
+                         <div class="mt-1">
+              <p
+                class="prose prose-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 max-w-none"
+              >
+                Adjusts the horizontal position of the entire label sheet on the page. Use this if the labels are printing too far to the left or right.
+              </p>
+            </div>
+          </div>
+          <div>
+            <label for="labelHeight" class="block text-sm font-medium">Label Height (mm)</label>
+            <input type="number" id="labelHeight" x-model="labelHeight" step="0.01" min="8" max="12" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500" />
+                         <div class="mt-1">
+              <p
+                class="prose prose-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 max-w-none"
+              >
+                Sets the height of each individual label in millimeters. Adjust this if the labels don't align vertically with the label sheet. 
+              </p>
+            </div>
+          </div>
+          <div>
+            <label for="scale" class="block text-sm font-medium">Content Scale (%)</label>
+            <input type="number" id="scale" x-model="scale" min="50" max="100" step="0.1" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500" />
+                         <div class="mt-1">
+              <p
+                class="prose prose-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 max-w-none"
+              >
+                Scales the entire content inside each label. Use this if the text or QR code is too large or too small. 
+              </p>
+            </div>
+          </div>
+
         </div>
         <button
           @click.prevent="generateLabels()"
@@ -193,23 +255,39 @@
       </form>
     </div>
 
-    <div
-      class="container mx-auto w-[210mm] border px-[8.45mm] py-[13.5mm] print:w-full print:max-w-full print:border-0"
-    >
+      <div
+          class="container mx-auto w-[210mm] print:w-full print:max-w-full print:border-0"
+          :style="`
+            padding-top: calc(13.5mm + ${verticalOffset}mm);
+            padding-left: calc(8.45mm + ${horizontalOffset}mm);
+            padding-right: 8.45mm;
+            padding-bottom: 13.5mm;
+          `"
+        >
       <!-- Display QR Code Labels -->
-      <ol class="grid grid-cols-7 gap-x-[2.55mm]">
+      <ol
+          class="grid grid-cols-7 gap-x-[2.55mm]"
+          :style="`transform: translateX(${horizontalOffset}mm)`"
+        >
         <template x-for="label in labels">
-          <li class="h-[10mm] w-[25.4mm]">
+          <li
+            :style="`height: ${labelHeight}mm; width: 25.4mm;`"
+          >
             <div
-              class="flex h-[9mm] w-[24.4mm] items-center border-[0.5mm] odd:border-blue-500 even:border-red-300"
-              :class="{'even:border-transparent odd:border-transparent': !borderToggle}"
+              class="flex items-center justify-center border-[0.5mm]"
+              :style="`
+                height: ${labelHeight - 0.5}mm;
+                width: 24.4mm;
+                transform: scale(${scale / 100});
+                transform-origin: center;
+              `"
+              :class="{'border-transparent': !borderToggle}"
             >
               <img
                 :src="label.qrCodeUrl"
-                alt=""
-                width="100"
-                height="100"
-                class="mr-[0.5mm] aspect-square h-[9mm] w-[9mm] flex-none"
+                alt="QR Code"
+                class="aspect-square flex-none"
+                :style="`height: ${labelHeight - 1}mm; width: ${labelHeight - 1}mm;`"
                 referrerpolicy="no-referrer"
               />
               <div
@@ -257,6 +335,10 @@
           startNumber: 1,
           prefix: "ASN",
           leadingZeros: 4,
+          verticalOffset: 0,
+          horizontalOffset: 0,
+          labelHeight: 10,
+          scale: 100,          
           borderToggle: false,
           labels: [],
 
