@@ -260,6 +260,34 @@
           borderToggle: false,
           labels: [],
 
+          readUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has("startNumber")) {
+              const val = parseInt(params.get("startNumber"), 10);
+              if (!isNaN(val) && val >= 1) this.startNumber = val;
+            }
+            if (params.has("prefix")) {
+              this.prefix = params.get("prefix");
+            }
+            if (params.has("leadingZeros")) {
+              const val = parseInt(params.get("leadingZeros"), 10);
+              if (!isNaN(val) && val >= 0) this.leadingZeros = val;
+            }
+            if (params.has("borderToggle")) {
+              this.borderToggle = params.get("borderToggle") === "true";
+            }
+          },
+
+          updateUrl() {
+            const params = new URLSearchParams();
+            params.set("startNumber", this.startNumber);
+            params.set("prefix", this.prefix);
+            params.set("leadingZeros", this.leadingZeros);
+            params.set("borderToggle", this.borderToggle);
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            window.history.replaceState({}, "", newUrl);
+          },
+
           generateLabels() {
             this.labels = [];
             let totalLabels = 7 * 27; // 7 columns x 27 rows
@@ -278,11 +306,13 @@
 
               this.labels.push({ qrCodeUrl, text });
             }
+            this.updateUrl();
           },
           printLabels() {
             window.print();
           },
           init() {
+            this.readUrlParams();
             this.generateLabels();
           },
         };
