@@ -31,7 +31,7 @@ jobs:
         run: npm run generate-pdf
 
       - name: Upload PDF artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: asn-labels-pdf
           path: asn-labels.pdf
