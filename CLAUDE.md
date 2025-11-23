@@ -25,7 +25,22 @@ Single-page application using AlpineJS for reactivity. Key structure in `index.h
 
 - **Print styling**: Uses CSS `@page` rule for A4 paper with zero margins (requires Chrome/Chromium)
 
-- **Label format**: Hardcoded for Avery L4731REV-25 labels with specific dimensions (25.4mm × 10mm per label)
+- **Label format**: Hardcoded for Avery L4731REV-25 labels (see specifications below)
+
+## Avery L4731REV-25 Label Specifications
+
+Page: A4 (210mm × 297mm)
+
+| Dimension | Value |
+|-----------|-------|
+| Label size | 25.4mm × 10mm |
+| Grid | 7 columns × 27 rows (189 labels) |
+| Top/Bottom margin | 13.5mm |
+| Left/Right margin | 8.6mm |
+| Horizontal gap | 2.5mm |
+| Vertical gap | 0mm (labels touch) |
+| Horizontal pitch | 27.9mm |
+| Vertical pitch | 10mm |
 
 ## Code Style
 
