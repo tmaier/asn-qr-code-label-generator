@@ -1,0 +1,12 @@
+{
+  "name": "asn-qr-code-label-generator",
+  "version": "1.0.0",
+  "description": "QR code label generator for Paperless-ngx Archive Serial Numbers",
+  "private": true,
+  "scripts": {
+    "generate-pdf": "node scripts/generate-pdf.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  }
+}
