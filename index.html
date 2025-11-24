@@ -89,6 +89,7 @@
               type="number"
               id="startNumber"
               x-model="startNumber"
+              @input="updateUrl()"
               required
               min="1"
               step="1"
@@ -120,6 +121,7 @@
               type="text"
               id="prefix"
               x-model="prefix"
+              @input="updateUrl()"
               required
               value="ASN"
               class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
@@ -147,6 +149,7 @@
               type="number"
               id="leadingZeros"
               x-model="leadingZeros"
+              @input="updateUrl()"
               required
               value="5"
               min="0"
@@ -160,6 +163,7 @@
                   type="checkbox"
                   id="borderToggle"
                   x-model="borderToggle"
+                  @change="updateUrl()"
                   class="focus:ring-3 h-4 w-4 rounded border border-gray-300 bg-gray-50 focus:ring-blue-300"
                 />
               </div>
@@ -260,6 +264,34 @@
           borderToggle: false,
           labels: [],
 
+          readUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has("startNumber")) {
+              const val = parseInt(params.get("startNumber"), 10);
+              if (!isNaN(val) && val >= 1) this.startNumber = val;
+            }
+            if (params.has("prefix")) {
+              this.prefix = params.get("prefix");
+            }
+            if (params.has("leadingZeros")) {
+              const val = parseInt(params.get("leadingZeros"), 10);
+              if (!isNaN(val) && val >= 0) this.leadingZeros = val;
+            }
+            if (params.has("borderToggle")) {
+              this.borderToggle = params.get("borderToggle") === "true";
+            }
+          },
+
+          updateUrl() {
+            const params = new URLSearchParams();
+            params.set("startNumber", this.startNumber);
+            params.set("prefix", this.prefix);
+            params.set("leadingZeros", this.leadingZeros);
+            params.set("borderToggle", this.borderToggle);
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            window.history.replaceState({}, "", newUrl);
+          },
+
           generateLabels() {
             this.labels = [];
             let totalLabels = 7 * 27; // 7 columns x 27 rows
@@ -283,6 +315,7 @@
             window.print();
           },
           init() {
+            this.readUrlParams();
             this.generateLabels();
           },
         };
