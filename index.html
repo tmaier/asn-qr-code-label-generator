@@ -181,6 +181,30 @@
               </p>
             </div>
           </div>
+          <div>
+            <div class="flex items-start">
+              <div class="flex h-5 items-center">
+                <input
+                  type="checkbox"
+                  id="printPrefix"
+                  x-model="printPrefix"
+                  class="focus:ring-3 h-4 w-4 rounded border border-gray-300 bg-gray-50 focus:ring-blue-300"
+                />
+              </div>
+              <label
+                for="printPrefix"
+                class="ms-2 text-sm font-medium text-gray-900"
+                >Print Prefix</label
+              >
+            </div>
+            <div class="mt-1">
+              <p
+                class="prose prose-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 max-w-none"
+              >
+                Enables printing the prefix as text
+              </p>
+            </div>
+          </div>
         </div>
         <button
           @click.prevent="generateLabels()"
@@ -225,7 +249,7 @@
                 'text-[2.4mm]': label.text.length == 9,
                 'text-[2.1mm]': label.text.length >= 10,
               }"
-                x-text="label.text"
+                x-text="label.qrCodeLabel"
               ></div>
             </div>
           </li>
@@ -262,6 +286,7 @@
           prefix: "ASN",
           leadingZeros: 4,
           borderToggle: false,
+          printPrefix: true,
           labels: [],
 
           readUrlParams() {
@@ -294,21 +319,22 @@
 
           generateLabels() {
             this.labels = [];
-            let totalLabels = 7 * 27; // 7 columns x 27 rows
-            let startNumberInt = parseInt(this.startNumber, 10); // Ensure startNumber is an integer
-            let leadingZerosInt = parseInt(this.leadingZeros, 10); // Ensure leadingZeros is an integer
+            const totalLabels = 7 * 27; // 7 columns x 27 rows
+            const startNumberInt = parseInt(this.startNumber, 10); // Ensure startNumber is an integer
+            const leadingZerosInt = parseInt(this.leadingZeros, 10); // Ensure leadingZeros is an integer
             for (let i = 0; i < totalLabels; i++) {
-              let number = startNumberInt + i;
-              let paddedNumber = number
+              const number = startNumberInt + i;
+              const paddedNumber = number
                 .toString()
                 .padStart(leadingZerosInt + 1, "0");
-              let text = this.prefix + paddedNumber;
+              const qrCodeContent = this.prefix + paddedNumber;
+              const qrCodeLabel = this.printPrefix ? qrCodeContent : paddedNumber;
               // See https://goqr.me/api/doc/create-qr-code/
-              let qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
-                text
+              const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+                qrCodeContent
               )}`;
 
-              this.labels.push({ qrCodeUrl, text });
+              this.labels.push({ qrCodeUrl, qrCodeLabel });
             }
           },
           printLabels() {
