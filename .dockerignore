@@ -1,0 +1,9 @@
+node_modules
+.git
+.github
+*.md
+.gitignore
+.editorconfig
+package*.json
+scripts
+CLAUDE.md
