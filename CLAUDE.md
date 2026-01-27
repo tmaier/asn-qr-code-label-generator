@@ -18,29 +18,29 @@ The application uses CDN-hosted dependencies:
 
 Single-page application using AlpineJS for reactivity. Key structure in `index.html`:
 
-- **`qrCodeApp()`** (line 255): AlpineJS component containing all application state and logic
+- **`qrCodeApp()`** (line 259): AlpineJS component containing all application state and logic
   - `generateLabels()`: Creates label data array with QR code URLs via external API (api.qrserver.com)
   - `printLabels()`: Triggers browser print dialog
-  - Generates 189 labels per sheet (7 columns × 27 rows)
+  - Generates 80 labels per sheet (4 columns × 20 rows)
 
-- **Print styling**: Uses CSS `@page` rule for A4 paper with zero margins (requires Chrome/Chromium)
+- **Print styling**: Uses CSS `@page` rule for US Letter paper with zero margins (requires Chrome/Chromium)
 
-- **Label format**: Hardcoded for Avery L4731REV-25 labels (see specifications below)
+- **Label format**: Hardcoded for Avery 8167 labels (see specifications below)
 
-## Avery L4731REV-25 Label Specifications
+## Avery 8167 Label Specifications
 
-Page: A4 (210mm × 297mm)
+Page: US Letter (8.5" × 11" / 215.9mm × 279.4mm)
 
 | Dimension | Value |
 |-----------|-------|
-| Label size | 25.4mm × 10mm |
-| Grid | 7 columns × 27 rows (189 labels) |
-| Top/Bottom margin | 13.5mm |
-| Left/Right margin | 8.6mm |
-| Horizontal gap | 2.5mm |
-| Vertical gap | 0mm (labels touch) |
-| Horizontal pitch | 27.9mm |
-| Vertical pitch | 10mm |
+| Label size | 1.75" × 0.5" (44.45mm × 12.7mm) |
+| Grid | 4 columns × 20 rows (80 labels) |
+| Top/Bottom margin | 0.5" (12.7mm) |
+| Left/Right margin | 0.3" (7.62mm) |
+| Horizontal gap | 0.3" (7.62mm) |
+| Vertical gap | 0" (labels touch) |
+| Horizontal pitch | 2.05" (52.07mm) |
+| Vertical pitch | 0.5" (12.7mm) |
 
 ## Code Style
 
