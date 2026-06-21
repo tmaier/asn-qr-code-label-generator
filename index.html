@@ -22,6 +22,10 @@
           size: A4;
         }
       }
+
+      .colorPicker {
+        height: 42px;        
+      }
     </style>
   </head>
   <body class="print:p-0" x-data="qrCodeApp()">
@@ -154,6 +158,20 @@
               value="5"
               min="0"
               class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+            />            
+          </div>
+          <div>
+            <label
+              for="color"
+              class="mb-2 block text-sm font-medium text-gray-900"
+              >Color</label
+            >
+            <input
+              type="color"
+              id="color"
+              x-model="color"
+              @input="updateUrl()"                      
+              class="w-full rounded-lg border focus:border-blue-500 focus:ring-blue-500 colorPicker"
             />
           </div>
           <div>
@@ -225,6 +243,7 @@
                 'text-[2.4mm]': label.text.length == 9,
                 'text-[2.1mm]': label.text.length >= 10,
               }"
+                :style="'color: ' + color"
                 x-text="label.text"
               ></div>
             </div>
@@ -261,6 +280,7 @@
           startNumber: 1,
           prefix: "ASN",
           leadingZeros: 4,
+          color: "#000000",
           borderToggle: false,
           labels: [],
 
@@ -277,16 +297,20 @@
               const val = parseInt(params.get("leadingZeros"), 10);
               if (!isNaN(val) && val >= 0) this.leadingZeros = val;
             }
+            if (params.has("color")) {
+              const val = params.get("color");              
+            }
             if (params.has("borderToggle")) {
               this.borderToggle = params.get("borderToggle") === "true";
             }
           },
 
-          updateUrl() {
+          updateUrl() {            
             const params = new URLSearchParams();
             params.set("startNumber", this.startNumber);
             params.set("prefix", this.prefix);
             params.set("leadingZeros", this.leadingZeros);
+            params.set("color", this.color);
             params.set("borderToggle", this.borderToggle);
             const newUrl = `${window.location.pathname}?${params.toString()}`;
             window.history.replaceState({}, "", newUrl);
@@ -303,8 +327,9 @@
                 .toString()
                 .padStart(leadingZerosInt + 1, "0");
               let text = this.prefix + paddedNumber;
+              let color = this.color.replace("#", "");
               // See https://goqr.me/api/doc/create-qr-code/
-              let qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+              let qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&color=${color}&data=${encodeURIComponent(
                 text
               )}`;
 
