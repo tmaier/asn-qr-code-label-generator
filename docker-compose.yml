@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  asn-qr-label-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: asn-qr-label-generator
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider --quiet http://127.0.0.1:80/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
