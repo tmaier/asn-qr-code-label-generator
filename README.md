@@ -1,56 +1,50 @@
-# QR Code Label Generator for ASNs in Paperless-ngx
+# Code 128 ASN Label Generator (L4731 pair layout)
 
-## About the Project
+Fork of [tmaier/asn-qr-code-label-generator](https://github.com/tmaier/asn-qr-code-label-generator), adapted for local Paperless-ngx use on Avery **L4731** sheets.
 
-This project is a web-based QR code label generator specifically designed for generating Archive Serial Number (ASN) labels in Paperless-ngx. It's a simple and efficient tool aimed at streamlining the process of creating QR code labels for document management.
+## What changed vs upstream
 
-A live version of this application can be accessed at <https://tobiasmaier.info/asn-qr-code-label-generator/>.
+| Upstream | This fork |
+|----------|-----------|
+| QR via `api.qrserver.com` | **Code 128** via [JsBarcode](https://github.com/lindell/JsBarcode) (CDN, offline after cache) |
+| QR + text in **one** 25.4×10 mm cell | **Pair layout**: barcode label → digit label |
+| 189 ASNs / sheet | **94 ASNs / sheet** (94 pairs + 1 empty trailing label) |
+| Default padded `ASN00001` | Default **short** payload `ASN1` (leading zeros = 0) |
 
-### Current Status
+Scan validation (zxing in `dok-paperless` path, 300 DPI, no upscale): **94 / 94** on the paired Code 128 sheet.
 
-This application is currently in an **early alpha stage** and has not been extensively tested.
-Users are encouraged to validate the output, especially the positioning of the labels.
+## Usage
 
-### Supported label formats
+Open `index.html` in Chrome/Chromium (or any static file server). Set start number / prefix / leading zeros, then **Print Labels** at 1:1 scale (no “fit to page”).
 
-The application currently supports the following label formats:
+Next sheet start = current start + **94**.
 
-- Avery L4731REV-25 (See [UK shop](https://www.avery.co.uk/product/mini-multipurpose-labels-l4731rev-25), [DE shop](https://www.avery-zweckform.com/produkt/universal-etiketten-l4731rev-25))
+Paperless knobs to keep in sync:
 
-### Limitations
+- `PAPERLESS_CONSUMER_ENABLE_ASN_BARCODE=true`
+- `PAPERLESS_CONSUMER_ENABLE_BARCODES=true` (needed for ASN split)
+- `PAPERLESS_CONSUMER_ASN_BARCODE_PREFIX` = same as the UI prefix (default `ASN`)
 
-The application currently has the following limitations:
+## Label geometry (Avery L4731REV-25)
 
-- The application is currently only available in English.
-  This is considered a non-issue, as the application is designed to be self-explanatory.
-- The application currently only supports the Avery L4731REV-25 label format.
-  Contributions for additional label formats are welcome.
-- The application only supports Google Chrome and Chromium-based browsers, such as Microsoft Edge. And partially Firefox.
-  This limitation is due to the use of the [CSS `@page` rule](https://developer.mozilla.org/en-US/docs/Web/CSS/@page) for printing.
-  Contributions for additional browser support are welcome.
+| Dimension | Value |
+|-----------|-------|
+| Page | A4 |
+| Label | 25.4 mm × 10 mm |
+| Grid | 7 × 27 = 189 cells |
+| Margins | top/bottom 13.5 mm, left/right 8.6 mm |
+| Horizontal gap | 2.5 mm |
 
-### Key Design Decisions
+Cell order left→right, top→bottom: `barcode(ASN n)`, `text(n)`, …, last cell empty.
 
-- **Browser-Based Application**: The application is designed to run entirely on the client side, avoiding the need for server-side logic. This approach simplifies deployment and reduces hosting requirements.
+## CLI PDF (optional)
 
-- **Simple Technology Stack**: The application is built using [TailwindCSS](https://tailwindcss.com) and [AlpineJS](https://alpinejs.dev). TailwindCSS provides utility-first CSS classes for styling, while AlpineJS offers reactive and declarative JavaScript for handling interactivity. This combination results in a comparatively lightweight and maintainable codebase.
-
-## Contributions
-
-Contributions to this project are welcome.
-If you have ideas for improvements or have found bugs, please feel free to contribute.
-You can submit your contributions via GitHub at <https://github.com/tmaier/asn-qr-code-label-generator>.
-
-## Acknowledgments
-
-This project has been made possible with the support and sponsorship of [BauCloud GmbH](https://www.baucloud.com).
-
-Special thanks to [Marvin Gaube](https://margau.net) for the insightful blog post ["paperless-ngx with qr codes as ASN: My Workflow"](https://margau.net/posts/2023-04-16-paperless-ngx-asn/). His workflow greatly inspired the development of this application.
-
-Additionally, this project drew inspiration from the CLI tool [paperless-asn-qr-codes](https://git.jcg.re/jcgruenhage/paperless-asn-qr-codes) developed by [Jan Christian Grünhage](https://jcg.re). His work follows the same goal of streamlining the process of creating ASN labels for paperless-ng, but uses a different approach.
+```bash
+npm ci
+npx playwright install chromium
+npm run generate-pdf   # writes asn-labels.pdf
+```
 
 ## License
 
-This project is licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0)](https://www.gnu.org/licenses/agpl-3.0.html).
-
-All rights reserved by [Tobias L. Maier](https://tobiasmaier.info).
+AGPL-3.0 — see [LICENSE](./LICENSE). Upstream © Tobias L. Maier.
