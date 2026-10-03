@@ -1,49 +1,46 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for working in this repository.
 
 ## Project Overview
 
-A browser-based QR code label generator for Paperless-ngx Archive Serial Numbers (ASN). The entire application is a single `index.html` file with no build process.
+Browser-based **Code 128** ASN label generator for Paperless-ngx on Avery L4731 sheets. Single `index.html`, no build step. Fork of tmaier/asn-qr-code-label-generator adapted to a **pair layout** (barcode cell + digit cell).
 
 ## Development
 
-**No build tools required** - Open `index.html` directly in a browser or serve it with any static file server.
+Open `index.html` in a browser or serve with any static file server.
 
-The application uses CDN-hosted dependencies:
-- TailwindCSS (with forms and typography plugins)
+CDN dependencies:
+
+- TailwindCSS (forms + typography)
 - AlpineJS 3.x
+- JsBarcode (Code 128, no external QR API)
+
+Optional PDF:
+
+```bash
+npm ci && npx playwright install chromium && npm run generate-pdf
+```
 
 ## Architecture
 
-Single-page application using AlpineJS for reactivity. Key structure in `index.html`:
+Alpine component `asnLabelApp()` in `index.html`:
 
-- **`qrCodeApp()`** (line 255): AlpineJS component containing all application state and logic
-  - `generateLabels()`: Creates label data array with QR code URLs via external API (api.qrserver.com)
-  - `printLabels()`: Triggers browser print dialog
-  - Generates 189 labels per sheet (7 columns × 27 rows)
+- `generateLabels()` — 94 pairs (`barcode` + `text`) + 1 `empty` = 189 cells
+- `renderBarcode()` — JsBarcode CODE128, `displayValue: false`, SVG stretched to full cell
+- Default `leadingZeros: 0` → short payload `ASN1`
+- Print via CSS `@page` A4 zero margin (Chrome/Chromium)
 
-- **Print styling**: Uses CSS `@page` rule for A4 paper with zero margins (requires Chrome/Chromium)
-
-- **Label format**: Hardcoded for Avery L4731REV-25 labels (see specifications below)
-
-## Avery L4731REV-25 Label Specifications
-
-Page: A4 (210mm × 297mm)
+## Avery L4731REV-25
 
 | Dimension | Value |
 |-----------|-------|
 | Label size | 25.4mm × 10mm |
-| Grid | 7 columns × 27 rows (189 labels) |
+| Grid | 7 × 27 (189 labels) |
 | Top/Bottom margin | 13.5mm |
 | Left/Right margin | 8.6mm |
 | Horizontal gap | 2.5mm |
-| Vertical gap | 0mm (labels touch) |
-| Horizontal pitch | 27.9mm |
-| Vertical pitch | 10mm |
 
 ## Code Style
 
-- 2 spaces for indentation
-- LF line endings
-- UTF-8 encoding
+- 2 spaces, LF, UTF-8
