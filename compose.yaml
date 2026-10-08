@@ -1,0 +1,6 @@
+services:
+  asn-qr-code-label-generator:
+    image: ${IMAGE_REPOSITORY:-ghcr.io/tmaier/asn-qr-code-label-generator}:${IMAGE_TAG:-latest}
+    ports:
+      - "${APP_PORT:-8080}:80"
+    restart: unless-stopped

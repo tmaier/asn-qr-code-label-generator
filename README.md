@@ -41,6 +41,20 @@ Contributions to this project are welcome.
 If you have ideas for improvements or have found bugs, please feel free to contribute.
 You can submit your contributions via GitHub at <https://github.com/tmaier/asn-qr-code-label-generator>.
 
+## Container Image
+
+The application can be served as a static container image.
+The `Publish container image` GitHub Action can be started manually and publishes the image to GitHub Container Registry.
+
+Run the published image with Docker Compose:
+
+```sh
+IMAGE_REPOSITORY=ghcr.io/tmaier/asn-qr-code-label-generator IMAGE_TAG=latest docker compose up -d
+```
+
+The app is then available at <http://localhost:8080>.
+Set `APP_PORT` to use a different host port.
+
 ## Acknowledgments
 
 This project has been made possible with the support and sponsorship of [BauCloud GmbH](https://www.baucloud.com).
