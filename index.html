@@ -104,9 +104,7 @@
                 the <strong>next batch</strong> of labels should
                 <strong
                   >start with
-                  <span x-text="parseInt(startNumber, 10) + 189"
-                    >190</span
-                  ></strong
+                  <span x-text="nextBatchStartNumber()">190</span></strong
                 >.
               </p>
             </div>
@@ -182,18 +180,26 @@
             </div>
           </div>
         </div>
-        <button
-          @click.prevent="generateLabels()"
-          class="w-full rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 sm:w-auto"
-        >
-          Regenerate Labels
-        </button>
-        <button
-          @click.prevent="printLabels()"
-          class="w-full rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 sm:w-auto"
-        >
-          Print Labels
-        </button>
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <button
+            @click.prevent="generateLabels()"
+            class="w-full rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 sm:w-auto"
+          >
+            Regenerate Labels
+          </button>
+          <button
+            @click.prevent="printLabels()"
+            class="w-full rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 sm:w-auto"
+          >
+            Print Labels
+          </button>
+          <button
+            @click.prevent="nextPage()"
+            class="w-full rounded-lg bg-gray-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-300 sm:w-auto"
+          >
+            Generate Next Page
+          </button>
+        </div>
       </form>
     </div>
 
@@ -292,6 +298,12 @@
             window.history.replaceState({}, "", newUrl);
           },
 
+          nextBatchStartNumber() {
+            const startNumberInt = parseInt(this.startNumber, 10);
+            if (isNaN(startNumberInt)) return 190;
+            return startNumberInt + 7 * 27;
+          },
+
           generateLabels() {
             this.labels = [];
             let totalLabels = 7 * 27; // 7 columns x 27 rows
@@ -310,6 +322,11 @@
 
               this.labels.push({ qrCodeUrl, text });
             }
+          },
+          nextPage() {
+            this.startNumber = this.nextBatchStartNumber();
+            this.updateUrl();
+            this.generateLabels();
           },
           printLabels() {
             window.print();
