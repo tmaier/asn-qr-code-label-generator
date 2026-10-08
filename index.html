@@ -14,6 +14,10 @@
       defer
     ></script>
     <style>
+      [x-cloak] {
+        display: none !important;
+      }
+
       @media print {
         /* See https://caniuse.com/css-paged-media */
         @page {
@@ -182,6 +186,125 @@
             </div>
           </div>
         </div>
+        <div class="mb-5">
+          <button
+            type="button"
+            @click="spacingExpanded = !spacingExpanded"
+            class="mb-3 flex w-full items-center gap-2 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-left text-sm font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-blue-300"
+            :aria-expanded="spacingExpanded.toString()"
+            aria-controls="sheetSpacingControls"
+          >
+            <span
+              aria-hidden="true"
+              class="inline-block transition-transform"
+              :class="{ 'rotate-90': spacingExpanded }"
+              >&#9656;</span
+            >
+            Sheet Spacing
+          </button>
+          <div
+            id="sheetSpacingControls"
+            x-show="spacingExpanded"
+            x-cloak
+            class="mx-auto grid max-w-full grid-cols-[5rem_minmax(0,8rem)_5rem] grid-rows-[auto_auto_auto_auto] items-center justify-center gap-2 sm:max-w-md sm:grid-cols-[6.5rem_minmax(0,12rem)_6.5rem]"
+          >
+            <p
+              class="prose prose-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 col-span-3 max-w-none text-center"
+            >
+              Values are limited to <strong>fit on an A4 page</strong>.
+            </p>
+            <div></div>
+            <div>
+              <label
+                for="paddingTop"
+                class="mb-1 block text-center text-xs font-medium text-gray-700"
+                >Top py (mm)</label
+              >
+              <input
+                type="number"
+                id="paddingTop"
+                x-model="paddingTop"
+                @change="updateVerticalSpacing()"
+                min="0"
+                step="0.1"
+                class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 text-center text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+              />
+            </div>
+            <div></div>
+
+            <div>
+              <label
+                for="paddingLeft"
+                class="mb-1 block text-center text-xs font-medium text-gray-700"
+                >Left px (mm)</label
+              >
+              <input
+                type="number"
+                id="paddingLeft"
+                x-model="paddingLeft"
+                @change="updateSheetSpacing('paddingLeft')"
+                min="0"
+                step="0.1"
+                class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 text-center text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+              />
+            </div>
+            <div
+              class="grid aspect-[210/297] min-h-56 place-items-center border border-gray-400 bg-white p-4 shadow-sm"
+            >
+              <div>
+                <label
+                  for="rowGap"
+                  class="mb-1 block text-center text-xs font-medium text-gray-700"
+                  >Row gap (mm)</label
+                >
+                <input
+                  type="number"
+                  id="rowGap"
+                  x-model="rowGap"
+                  @change="updateVerticalSpacing()"
+                  min="0"
+                  step="0.1"
+                  class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 text-center text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label
+                for="paddingRight"
+                class="mb-1 block text-center text-xs font-medium text-gray-700"
+                >Right px (mm)</label
+              >
+              <input
+                type="number"
+                id="paddingRight"
+                x-model="paddingRight"
+                @change="updateSheetSpacing('paddingRight')"
+                min="0"
+                step="0.1"
+                class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 text-center text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+              />
+            </div>
+
+            <div></div>
+            <div>
+              <label
+                for="paddingBottom"
+                class="mb-1 block text-center text-xs font-medium text-gray-700"
+                >Bottom py (mm)</label
+              >
+              <input
+                type="number"
+                id="paddingBottom"
+                x-model="paddingBottom"
+                @change="updateSheetSpacing('paddingBottom')"
+                min="0"
+                step="0.1"
+                class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 text-center text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+              />
+            </div>
+            <div></div>
+          </div>
+        </div>
         <button
           @click.prevent="generateLabels()"
           class="w-full rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 sm:w-auto"
@@ -198,10 +321,19 @@
     </div>
 
     <div
-      class="container mx-auto w-[210mm] border px-[8.6mm] py-[13.5mm] print:w-full print:max-w-full print:border-0"
+      class="container mx-auto w-[210mm] border print:w-full print:max-w-full print:border-0"
+      :style="{
+        paddingTop: `${paddingTop}mm`,
+        paddingRight: `${paddingRight}mm`,
+        paddingBottom: `${paddingBottom}mm`,
+        paddingLeft: `${paddingLeft}mm`,
+      }"
     >
       <!-- Display QR Code Labels -->
-      <ol class="grid grid-cols-7 gap-x-[2.5mm]">
+      <ol
+        class="grid grid-cols-7 gap-x-[2.5mm]"
+        :style="{ rowGap: `${rowGap}mm` }"
+      >
         <template x-for="label in labels">
           <li class="h-[10mm] w-[25.4mm]">
             <div
@@ -262,6 +394,12 @@
           prefix: "ASN",
           leadingZeros: 4,
           borderToggle: false,
+          spacingExpanded: false,
+          paddingTop: 13.5,
+          paddingRight: 8.6,
+          paddingBottom: 13.5,
+          paddingLeft: 8.6,
+          rowGap: 0,
           labels: [],
 
           readUrlParams() {
@@ -280,6 +418,15 @@
             if (params.has("borderToggle")) {
               this.borderToggle = params.get("borderToggle") === "true";
             }
+            ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "rowGap"].forEach(
+              (key) => {
+                if (params.has(key)) {
+                  const val = parseFloat(params.get(key));
+                  if (!isNaN(val) && val >= 0) this[key] = val;
+                }
+              }
+            );
+            this.normalizeSheetSpacing();
           },
 
           updateUrl() {
@@ -288,8 +435,109 @@
             params.set("prefix", this.prefix);
             params.set("leadingZeros", this.leadingZeros);
             params.set("borderToggle", this.borderToggle);
+            params.set("paddingTop", this.paddingTop);
+            params.set("paddingRight", this.paddingRight);
+            params.set("paddingBottom", this.paddingBottom);
+            params.set("paddingLeft", this.paddingLeft);
+            params.set("rowGap", this.rowGap);
             const newUrl = `${window.location.pathname}?${params.toString()}`;
             window.history.replaceState({}, "", newUrl);
+          },
+
+          sheetLayoutLimits() {
+            const pageWidth = 210;
+            const pageHeight = 297;
+            const columnCount = 7;
+            const rowCount = 27;
+            const labelWidth = 25.4;
+            const labelHeight = 10;
+            const columnGap = 2.5;
+            const rowGapCount = rowCount - 1;
+
+            return {
+              horizontalSpace:
+                pageWidth - columnCount * labelWidth - (columnCount - 1) * columnGap,
+              verticalSpace: pageHeight - rowCount * labelHeight,
+              rowGapCount,
+            };
+          },
+
+          spacingNumber(value) {
+            const number = parseFloat(value);
+            return isNaN(number) || number < 0 ? 0 : number;
+          },
+
+          roundSpacing(value) {
+            return parseFloat(value.toFixed(2));
+          },
+
+          normalizeSheetSpacing(changedKey) {
+            const limits = this.sheetLayoutLimits();
+            const paddingLeft = this.spacingNumber(this.paddingLeft);
+            const paddingRight = this.spacingNumber(this.paddingRight);
+            const paddingTop = this.spacingNumber(this.paddingTop);
+            const paddingBottom = this.spacingNumber(this.paddingBottom);
+            const rowGap = this.spacingNumber(this.rowGap);
+
+            this.paddingLeft = this.roundSpacing(paddingLeft);
+            this.paddingRight = this.roundSpacing(paddingRight);
+            this.paddingTop = this.roundSpacing(
+              Math.min(paddingTop, limits.verticalSpace)
+            );
+            this.paddingBottom = this.roundSpacing(paddingBottom);
+            this.rowGap = this.roundSpacing(rowGap);
+
+            if (paddingLeft + paddingRight > limits.horizontalSpace) {
+              if (changedKey === "paddingLeft") {
+                this.paddingLeft = this.roundSpacing(
+                  Math.max(0, limits.horizontalSpace - paddingRight)
+                );
+              } else {
+                this.paddingRight = this.roundSpacing(
+                  Math.max(0, limits.horizontalSpace - paddingLeft)
+                );
+              }
+            }
+
+            const maxBottom =
+              limits.verticalSpace -
+              this.spacingNumber(this.paddingTop) -
+              limits.rowGapCount * this.spacingNumber(this.rowGap);
+
+            if (maxBottom < 0) {
+              this.rowGap = this.roundSpacing(
+                Math.max(
+                  0,
+                  (limits.verticalSpace - this.spacingNumber(this.paddingTop)) /
+                    limits.rowGapCount
+                )
+              );
+              this.paddingBottom = 0;
+            } else if (
+              changedKey === "paddingBottom" ||
+              this.spacingNumber(this.paddingBottom) > maxBottom
+            ) {
+              this.paddingBottom = this.roundSpacing(
+                Math.min(this.spacingNumber(this.paddingBottom), maxBottom)
+              );
+            }
+          },
+
+          updateSheetSpacing(changedKey) {
+            this.normalizeSheetSpacing(changedKey);
+            this.updateUrl();
+          },
+
+          updateVerticalSpacing() {
+            this.normalizeSheetSpacing("rowGap");
+            const limits = this.sheetLayoutLimits();
+            const paddingTop = this.spacingNumber(this.paddingTop);
+            const rowGap = this.spacingNumber(this.rowGap);
+            const remainingHeight =
+              limits.verticalSpace - paddingTop - limits.rowGapCount * rowGap;
+
+            this.paddingBottom = this.roundSpacing(Math.max(0, remainingHeight));
+            this.updateUrl();
           },
 
           generateLabels() {
