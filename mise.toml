@@ -11,17 +11,24 @@ run = [
   "npx playwright install ${CI:+--with-deps} chromium",
 ]
 
-[tasks.test]
-description = "Print the page to PDF and compare it with the Avery L4731REV-25 reference sheet"
+[tasks.build]
+description = "Build the standalone page into dist/"
 depends = ["install"]
-run = "node --test --test-reporter=spec 'tests/*.test.mjs'"
+sources = ["index.html", "src/**", "scripts/build.js", "package-lock.json"]
+outputs = ["dist/index.html", "dist/app.js", "dist/app.css", "dist/asn.css"]
+run = "npm run build"
+
+[tasks.test]
+description = "Unit tests, then print dist/index.html to PDF and compare it with the Avery L4731 reference sheet"
+depends = ["build"]
+run = "npm test"
 
 [tasks."test:live"]
-description = "Run the tests against the live site with the real QR code API"
-env = { ASN_TARGET = "https://tobiasmaier.info/asn-qr-code-label-generator/", ASN_LIVE_QR = "1" }
+description = "Run the tests against the live site"
+env = { ASN_TARGET = "https://tobiasmaier.info/asn-qr-code-label-generator/" }
 run = "mise run test"
 
 [tasks.pdf]
 description = "Print the default label sheet to asn-labels.pdf"
-depends = ["install"]
-run = "node scripts/generate-pdf.js"
+depends = ["build"]
+run = "npm run pdf"

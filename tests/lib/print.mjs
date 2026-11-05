@@ -5,38 +5,25 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
-import QRCode from "qrcode";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const LOCAL_ORIGIN = "http://asn-label-generator.test";
-
-// Offline stand-in for api.qrserver.com's `format=svg` output: a real QR
-// code of the requested data, same structure (viewBox = symbol in modules,
-// no quiet zone, one filled square per dark module, error correction L).
-export function qrSvg(data) {
-  const { modules } = QRCode.create(data, { errorCorrectionLevel: "L" });
-  const n = modules.size;
-  let d = "";
-  for (let y = 0; y < n; y++) {
-    for (let x = 0; x < n; x++) {
-      if (modules.get(y, x)) d += `M${x},${y}h1v1h-1z`;
-    }
-  }
-  return (
-    `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="300" height="300" viewBox="0 0 ${n} ${n}">` +
-    `<rect fill="#ffffff" x="0" y="0" width="${n}" height="${n}"/>` +
-    `<path fill="#000000" d="${d}"/></svg>`
-  );
-}
+const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css" };
 
 // Resolve what to test:
-//   ASN_TARGET unset            -> ./index.html of this checkout
-//   ASN_TARGET=path/to/file     -> that HTML file
+//   ASN_TARGET unset            -> dist/index.html of this checkout (mise run build)
+//   ASN_TARGET=path/to/file     -> that HTML file, with the files next to it
 //   ASN_TARGET=https://...      -> a deployed page, e.g. the live site
+//
+// A local target is served from its directory. `files` maps a path such as
+// "/asn.css" to content served instead of the file on disk.
 export function resolveTarget(target = process.env.ASN_TARGET) {
   if (target && /^https?:\/\//.test(target)) return { url: target };
-  const file = path.resolve(ROOT, target || "index.html");
-  return { url: `${LOCAL_ORIGIN}/`, html: fs.readFileSync(file, "utf8"), file };
+  const file = path.resolve(ROOT, target || "dist/index.html");
+  if (!fs.existsSync(file)) {
+    throw new Error(`${path.relative(ROOT, file)} not found; run \`mise run build\` first`);
+  }
+  return { url: `${LOCAL_ORIGIN}/`, html: fs.readFileSync(file, "utf8"), file, files: {} };
 }
 
 export async function launch() {
@@ -44,25 +31,22 @@ export async function launch() {
 }
 
 // Open the generator with the given URL parameters and wait until every
-// QR code has loaded. The caller closes the page.
-export async function openGenerator(browser, { target, params = {}, liveQr, pageOptions }) {
+// QR code has loaded. The caller closes the page. Each page gets a fresh
+// browser context, so nothing is left in localStorage from an earlier one.
+export async function openGenerator(browser, { target, params = {}, pageOptions }) {
   const page = await browser.newPage(pageOptions);
   if (target.html) {
-    await page.route(`${LOCAL_ORIGIN}/**`, (route) =>
-      route.fulfill({ contentType: "text/html", body: target.html }),
-    );
-  }
-  if (!liveQr) {
-    // Answer like the real API: SVG only when the page asks for it.
-    await page.route("https://api.qrserver.com/**", async (route) => {
-      const params = new URL(route.request().url()).searchParams;
-      const data = params.get("data");
-      if (params.get("format") === "svg") {
-        await route.fulfill({ contentType: "image/svg+xml", body: qrSvg(data) });
-      } else {
-        const png = await QRCode.toBuffer(data, { errorCorrectionLevel: "L", margin: 1, width: 300 });
-        await route.fulfill({ contentType: "image/png", body: png });
-      }
+    const dir = path.dirname(target.file);
+    await page.route(`${LOCAL_ORIGIN}/**`, (route) => {
+      let name = new URL(route.request().url()).pathname;
+      if (name === "/") name = "/index.html";
+      const file = path.join(dir, name);
+      const body =
+        name === "/index.html"
+          ? target.html
+          : (target.files?.[name] ?? (fs.existsSync(file) ? fs.readFileSync(file) : null));
+      if (body == null) return route.fulfill({ status: 404 });
+      return route.fulfill({ contentType: TYPES[path.extname(name)] ?? "application/octet-stream", body });
     });
   }
 

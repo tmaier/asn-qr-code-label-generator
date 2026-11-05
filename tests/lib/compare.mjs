@@ -67,9 +67,14 @@ export function expectedText({ startNumber, prefix, leadingZeros }, index) {
   return prefix + String(startNumber + index).padStart(leadingZeros + 1, "0");
 }
 
+// The text printed next to the QR code: without the prefix with hidePrefix.
+export function expectedPrintedText({ hidePrefix, ...params }, index) {
+  return expectedText({ ...params, prefix: hidePrefix ? "" : params.prefix }, index);
+}
+
 /**
  * @param pdf      result of readPdf()
- * @param options  { tolerance (mm), labels: { startNumber, prefix, leadingZeros } }
+ * @param options  { tolerance (mm), labels: { startNumber, prefix, leadingZeros, hidePrefix } }
  * @returns        { problems: string[], labels: [...], summary: {...} }
  */
 export function compareWithSheet(pdf, { tolerance, labels: labelParams }) {
@@ -194,7 +199,7 @@ export function compareWithSheet(pdf, { tolerance, labels: labelParams }) {
 
     // 3. The right number on the right label.
     if (labelParams) {
-      const want = expectedText(labelParams, cell.index);
+      const want = expectedPrintedText(labelParams, cell.index);
       if (str !== want) {
         entry.failed = true;
         problems.push(`${name}: printed text "${str}", expected "${want}"`);

@@ -1,9 +1,9 @@
 // Integration test: print the generator to PDF in Chromium and compare the
-// printed labels with the Avery L4731REV-25 reference sheet.
+// printed labels with the Avery L4731 reference sheet.
 //
-//   mise run test
+//   mise run test                                       # dist/index.html
 //   ASN_TOLERANCE_MM=0.5 mise run test                  # looser (default 0.3)
-//   mise run test:live                                  # live site, real QR API
+//   mise run test:live                                  # live site
 //
 // Printed PDFs, overlays with the reference sheet and JSON reports are
 // written to test-results/<case>/.
@@ -23,12 +23,12 @@ import { compareWithSheet, expectedText } from "./lib/compare.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = path.join(ROOT, "test-results");
+const SRC_CSS = path.join(ROOT, "src/asn.css");
 
 // Allowed deviation per label edge. Chromium snaps printed content to whole
 // CSS pixels (0.265 mm), which causes up to about ±0.13 mm per edge and
 // 0.22 mm at the corner arcs; 0.3 mm leaves a little headroom above that.
 const TOLERANCE = Number(process.env.ASN_TOLERANCE_MM || 0.3);
-const LIVE_QR = process.env.ASN_LIVE_QR === "1";
 const target = resolveTarget();
 
 // The generator's defaults, used when the URL has no parameters.
@@ -60,14 +60,18 @@ const CASES = [
     name: "custom-prefix",
     params: { ...APP_DEFAULTS, prefix: "Archiv-" },
   },
+  {
+    // Number alone on the label; the QR code still scans as prefix + number.
+    name: "hide-prefix",
+    params: { ...APP_DEFAULTS, hidePrefix: true },
+  },
 ];
 let browser;
 before(async () => {
   browser = await launch();
   console.log(
     `# target: ${target.file ?? target.url}\n` +
-      `# reference: ${SHEET.name}, tolerance ±${TOLERANCE} mm, ` +
-      `QR codes: ${LIVE_QR ? "live api.qrserver.com" : "generated offline"}`,
+      `# reference: ${SHEET.name}, tolerance ±${TOLERANCE} mm`,
   );
 });
 after(async () => browser?.close());
@@ -77,7 +81,6 @@ for (const c of CASES) {
     const pdfBytes = await printToPdf(browser, {
       target,
       params: c.params,
-      liveQr: LIVE_QR,
     });
     const result = compareWithSheet(await readPdf(pdfBytes), {
       tolerance: TOLERANCE,
@@ -128,7 +131,7 @@ for (const c of CASES) {
 
 for (const c of CASES.filter((c) => !c.params.borderToggle)) {
   test(`every QR code scans as its label text (${c.name})`, async () => {
-    const decoded = await scanLabels(browser, { target, params: c.params, liveQr: LIVE_QR });
+    const decoded = await scanLabels(browser, { target, params: c.params });
     const wrong = decoded
       .map((got, i) => ({ i, got, want: expectedText(c.labels ?? c.params, i) }))
       .filter(({ got, want }) => got !== want);
@@ -140,18 +143,34 @@ for (const c of CASES.filter((c) => !c.params.borderToggle)) {
   });
 }
 
+// The page prints with the sheet geometry of src/asn.css, unchanged: the
+// tests above check the CSS that consumers of the package import.
+test(
+  "the page uses src/asn.css unchanged",
+  { skip: !target.html && "ASN_TARGET is a URL" },
+  () => {
+    assert.match(target.html, /<link rel="stylesheet" href="asn\.css" \/>/);
+    const built = fs.readFileSync(path.join(path.dirname(target.file), "asn.css"), "utf8");
+    assert.equal(built, fs.readFileSync(SRC_CSS, "utf8"), "asn.css next to the page differs from src/asn.css; run `mise run build`");
+  },
+);
+
 // Negative control: the comparison must catch a geometry error well below
 // what anyone would notice on screen. Only meaningful for a local file.
 test(
   "detects a 1 mm left-margin error (negative control)",
   { skip: !target.html && "ASN_TARGET is a URL" },
   async () => {
+    const css = fs.readFileSync(SRC_CSS, "utf8");
     const marker = "--sheet-margin-left: calc(1in / 3)";
-    assert.ok(target.html.includes(marker), `index.html no longer contains "${marker}"; update this test`);
-    const broken = { ...target, html: target.html.replace(marker, "--sheet-margin-left: calc(1in / 3 + 1mm)") };
+    assert.ok(css.includes(marker), `src/asn.css no longer contains "${marker}"; update this test`);
+    const broken = {
+      ...target,
+      files: { "/asn.css": css.replace(marker, "--sheet-margin-left: calc(1in / 3 + 1mm)") },
+    };
     const params = APP_DEFAULTS;
     const result = compareWithSheet(
-      await readPdf(await printToPdf(browser, { target: broken, params, liveQr: false })),
+      await readPdf(await printToPdf(browser, { target: broken, params })),
       { tolerance: TOLERANCE, labels: params },
     );
     assert.ok(

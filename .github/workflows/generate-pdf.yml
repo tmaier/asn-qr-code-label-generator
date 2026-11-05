@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install tools from mise.toml
         uses: jdx/mise-action@v5
@@ -26,11 +26,14 @@ jobs:
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-npm-playwright-${{ hashFiles('package-lock.json') }}
 
+      - name: Build the standalone page into dist/
+        run: mise run build
+
       - name: Generate PDF
         run: mise run pdf
 
       - name: Upload PDF artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: asn-labels-pdf
           path: asn-labels.pdf

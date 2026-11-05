@@ -1,3 +1,4 @@
 node_modules/
 asn-labels.pdf
 test-results/
+dist/

@@ -24,7 +24,6 @@ test(`print layout matches ${SHEET.name} to ±${LAYOUT_TOLERANCE_MM} mm`, async 
   const page = await openGenerator(browser, {
     target,
     params: {},
-    liveQr: false,
     // A4 width in CSS px, so the page lays out like the printed page.
     pageOptions: { viewport: { width: Math.round(SHEET.pageWidth / PX_TO_MM), height: 1200 } },
   });
