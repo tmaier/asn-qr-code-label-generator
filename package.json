@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "generate-pdf": "node scripts/generate-pdf.js",
-    "test": "node --test --test-reporter=spec tests/"
+    "test": "node --test --test-reporter=spec \"tests/*.test.mjs\""
   },
   "devDependencies": {
     "pdf-lib": "^1.17.1",
