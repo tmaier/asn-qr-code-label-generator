@@ -1,8 +1,27 @@
 {
   "name": "asn-qr-code-label-generator",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "QR code label generator for Paperless-ngx Archive Serial Numbers",
+  "license": "AGPL-3.0-only",
+  "author": "Tobias L. Maier (https://tobiasmaier.info)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tmaier/asn-qr-code-label-generator.git"
+  },
   "private": true,
+  "exports": {
+    ".": "./src/index.js",
+    "./asn.css": "./src/asn.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src/",
+    "LICENSE",
+    "README.md"
+  ],
+  "dependencies": {
+    "uqr": "0.1.3"
+  },
   "devDependencies": {
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^6.5.438",

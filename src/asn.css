@@ -1,0 +1,116 @@
+/*
+ * Avery L4731: 189 labels (7 × 27) of 25.4 mm × 10 mm on A4. Every
+ * L4731REV-xx pack size (e.g. L4731REV-25) shares this layout.
+ * Values from Avery's own label designer, in the units it uses: inches
+ * across the sheet, millimetres down it and for the corner radius
+ * (see tests/fixtures/README.md). Keep in sync with
+ * tests/lib/avery-l4731rev-25.mjs and the table in README.md. COLUMNS and
+ * ROWS in src/labels.js must match --columns and --rows.
+ */
+:root {
+  --columns: 7;
+  --rows: 27;
+  --sheet-width: 210mm;
+  --sheet-margin-top: 13.5mm;
+  --sheet-margin-left: calc(1in / 3);
+  --label-width: 1in;
+  --label-height: 10mm;
+  --label-gap-x: 0.1in; /* pitch 1.1 in */
+  --label-radius: 2mm; /* die-cut corners */
+
+  /*
+   * The QR symbol's corners sit exactly on the label's corner arcs:
+   * inset r·(1 − 1/√2) from the edges, so the white space the QR code
+   * standard asks for around the symbol extends into the rounded
+   * corners and beyond the label instead of shrinking the symbol.
+   */
+  --qr-inset: calc(var(--label-radius) * (1 - 0.70710678));
+  --qr-size: calc(var(--label-height) - 2 * var(--qr-inset));
+  --text-left: calc(2 * var(--qr-inset) + var(--qr-size));
+  --text-right: var(--qr-inset);
+  --text-max-size: 3.9mm;
+
+  /* "Show Border" outline colours; override them to match a site. */
+  --asn-border-color: rgb(59 130 246);
+  --asn-border-color-alt: rgb(252 165 165);
+}
+
+/* The sheet is paper, also on a dark page. */
+.asn-sheet {
+  width: var(--sheet-width);
+  padding: var(--sheet-margin-top) 0 var(--sheet-margin-top)
+    var(--sheet-margin-left);
+  background: white;
+  color: black;
+}
+
+/*
+ * Every label is placed from its own row and column instead of by a
+ * grid: browsers round each 10 mm row to layout units (1/64 px), and in
+ * a grid that rounding adds up to 0.1 mm over 27 rows.
+ */
+.asn-labels {
+  position: relative;
+  width: calc(
+    var(--columns) * var(--label-width) + (var(--columns) - 1) *
+      var(--label-gap-x)
+  );
+  height: calc(var(--rows) * var(--label-height));
+}
+
+.asn-label {
+  position: absolute;
+  left: calc(var(--col) * (var(--label-width) + var(--label-gap-x)));
+  top: calc(var(--row) * var(--label-height));
+  width: var(--label-width);
+  height: var(--label-height);
+  border-radius: var(--label-radius);
+}
+
+.asn-label-qr {
+  position: absolute;
+  left: var(--qr-inset);
+  top: var(--qr-inset);
+  width: var(--qr-size);
+  height: var(--qr-size);
+}
+
+.asn-label-text {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--text-left);
+  right: var(--text-right);
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  font-size: var(--text-max-size);
+}
+
+/* "Show Border": outline the die-cut shape of every label. */
+.asn-show-border .asn-label {
+  outline: 0.2mm solid var(--asn-border-color);
+  outline-offset: -0.2mm;
+}
+.asn-show-border .asn-label:nth-of-type(even) {
+  outline-color: var(--asn-border-color-alt);
+}
+
+@media print {
+  .asn-sheet {
+    /* Let the page decide the width; the labels have fixed positions. */
+    width: auto;
+    /* No bottom padding, so a page a hair short of 297 mm (Chromium
+       prints A4 as 297.01 × 209.89 mm) never spills onto page 2. */
+    padding-bottom: 0;
+    /* The sheet starts at the page's top left corner. */
+    margin: 0;
+  }
+
+  /* See https://caniuse.com/css-paged-media */
+  @page {
+    /* Remove the default margin and the browser's header and footer. */
+    margin: 0;
+    size: A4;
+  }
+}
