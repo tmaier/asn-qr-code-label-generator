@@ -61,7 +61,7 @@ npm install github:tmaier/asn-qr-code-label-generator#v2.0.0
 
 | Import | Contents |
 |--------|----------|
-| `asn-qr-code-label-generator` | `asnLabels(options)` (Alpine component) and the label logic: `labelText`, `parseCount`, `sheet`, `qrSvg`, `qrDataUri`, `fromQuery`, `toQuery`, `DEFAULTS`, `COLUMNS`, `ROWS`, `PER_SHEET` |
+| `asn-qr-code-label-generator` | `asnLabels(options)` (Alpine component) and the label logic: `labelText`, `displayText`, `parseCount`, `sheet`, `nextSheetStart`, `qrSvg`, `qrDataUri`, `fromQuery`, `toQuery`, `DEFAULTS`, `COLUMNS`, `ROWS`, `PER_SHEET` |
 | `asn-qr-code-label-generator/asn.css` | Sheet geometry and print rules (`@page` A4 with no margin) |
 
 The component does not import Alpine; register it with your own:
@@ -88,6 +88,7 @@ The markup binds to the component and uses the classes from `asn.css`:
     <input type="text" x-model="prefix" />
     <input type="number" x-model="leadingZeros" :aria-invalid="!valid('leadingZeros')" />
     <input type="checkbox" x-model="borderToggle" />
+    <input type="checkbox" x-model="hidePrefix" />
     <p x-text="startHint"></p>
     <button type="button" @click="nextSheet()">Next sheet</button>
     <button type="button" @click="reset()">Reset</button>
@@ -107,9 +108,9 @@ The markup binds to the component and uses the classes from `asn.css`:
 </div>
 ```
 
-- Fields: `startNumber`, `leadingZeros` (strings, as the number inputs hold them), `prefix`, `borderToggle`.
-- Getters: `ok` (all fields valid), `labels` (one sheet of `{ text, col, row, qr }`, `qr` being an SVG data URI; empty while a field is invalid), `first` (text of the first label), `nextStart`, `startHint`.
-- Methods: `valid(field)`, `nextSheet()` (focuses `x-ref="startNumber"` if present), `reset()`, `print()`, `fitTexts()`.
+- Fields: `startNumber`, `leadingZeros` (strings, as the number inputs hold them), `prefix`, `borderToggle`, `hidePrefix` (default `false`: print only the number next to the QR code; the QR code still encodes prefix and number). All of them are kept in the query string and localStorage.
+- Getters: `ok` (all fields valid), `labels` (one sheet of `{ code, text, col, row, qr }`: `code` is what the QR code encodes, `text` what is printed, `qr` an SVG data URI of `code`; empty while a field is invalid), `first` (printed text of the first label), `nextStart` (start number of the next sheet, `startNumber` + 189), `startHint`.
+- Methods: `valid(field)`, `nextSheet()` (raises `startNumber` by one sheet, which updates the labels and the query string, and focuses `x-ref="startNumber"` if present), `reset()`, `print()`, `fitTexts()`.
 - Classes: `.asn-sheet` > `ol.asn-labels` > `li.asn-label` (with `--col` and `--row`) > `img.asn-label-qr` and `.asn-label-text` > `span`. `fitTexts()` shrinks the spans inside the component's root; `.asn-show-border` outlines the labels in `--asn-border-color` and `--asn-border-color-alt`.
 - In print, hide everything but `.asn-sheet` and keep the sheet at the top left of the page: `asn.css` sets the page and the sheet, not your site's header, navigation or footer.
 

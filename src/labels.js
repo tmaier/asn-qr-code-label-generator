@@ -12,6 +12,7 @@ export const DEFAULTS = Object.freeze({
   prefix: "ASN",
   leadingZeros: 3,
   borderToggle: false,
+  hidePrefix: false,
 });
 
 // "ASN" + 7 with 3 leading zeros is "ASN0007": the zeros pad a one-digit
@@ -28,10 +29,22 @@ export function parseCount(value, min) {
   return n >= min ? n : NaN;
 }
 
-// One sheet of labels, numbered row by row from the top left.
-export function sheet(startNumber, prefix, leadingZeros) {
+// The text printed next to the QR code. With hidePrefix it is the padded
+// number alone; the QR code still carries prefix and number (labelText),
+// which is what Paperless-ngx reads.
+export function displayText(number, prefix, leadingZeros, hidePrefix = false) {
+  return labelText(number, hidePrefix ? "" : prefix, leadingZeros);
+}
+
+// Start number of the sheet after the one starting at startNumber.
+export const nextSheetStart = (startNumber) => startNumber + PER_SHEET;
+
+// One sheet of labels, numbered row by row from the top left: `code` is
+// what the QR code encodes, `text` what is printed next to it.
+export function sheet(startNumber, prefix, leadingZeros, { hidePrefix = false } = {}) {
   return Array.from({ length: PER_SHEET }, (_, i) => ({
-    text: labelText(startNumber + i, prefix, leadingZeros),
+    code: labelText(startNumber + i, prefix, leadingZeros),
+    text: displayText(startNumber + i, prefix, leadingZeros, hidePrefix),
     col: i % COLUMNS,
     row: Math.floor(i / COLUMNS),
   }));
@@ -74,14 +87,17 @@ export function fromQuery(search) {
   if (!isNaN(zeros)) state.leadingZeros = zeros;
   if (params.has("borderToggle"))
     state.borderToggle = params.get("borderToggle") === "true";
+  if (params.has("hidePrefix"))
+    state.hidePrefix = params.get("hidePrefix") === "true";
   return state;
 }
 
-export function toQuery({ startNumber, prefix, leadingZeros, borderToggle }) {
+export function toQuery({ startNumber, prefix, leadingZeros, borderToggle, hidePrefix = false }) {
   return new URLSearchParams({
     startNumber,
     prefix,
     leadingZeros,
     borderToggle,
+    hidePrefix,
   }).toString();
 }

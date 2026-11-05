@@ -7,7 +7,8 @@ import {
   DEFAULTS,
   PER_SHEET,
   fromQuery,
-  labelText,
+  displayText,
+  nextSheetStart,
   parseCount,
   qrDataUri,
   sheet,
@@ -83,25 +84,28 @@ export function asnLabels({ storageKey = "asn-labels-v1", syncUrl = true } = {})
         prefix: this.prefix,
         leadingZeros: parseCount(this.leadingZeros, 0),
         borderToggle: this.borderToggle,
+        hidePrefix: this.hidePrefix,
       };
     },
-    // One sheet: [{ text, col, row, qr }], qr being an SVG data URI.
+    // One sheet: [{ code, text, col, row, qr }], qr being an SVG data URI
+    // of code; text is printed, without the prefix if hidePrefix is on.
     get labels() {
       const s = this.state;
       if (!s) return [];
-      return sheet(s.startNumber, s.prefix, s.leadingZeros).map((label) => ({
+      const opts = { hidePrefix: s.hidePrefix };
+      return sheet(s.startNumber, s.prefix, s.leadingZeros, opts).map((label) => ({
         ...label,
-        qr: qr(label.text),
+        qr: qr(label.code),
       }));
     },
     get first() {
       const s = this.state;
-      return s ? labelText(s.startNumber, s.prefix, s.leadingZeros) : "–";
+      return s ? displayText(s.startNumber, s.prefix, s.leadingZeros, s.hidePrefix) : "–";
     },
     // Start number of the following sheet, or null while it is invalid.
     get nextStart() {
       const start = parseCount(this.startNumber, 1);
-      return isNaN(start) ? null : start + PER_SHEET;
+      return isNaN(start) ? null : nextSheetStart(start);
     },
     get startHint() {
       if (!this.valid("startNumber")) return "Enter a whole number from 1.";

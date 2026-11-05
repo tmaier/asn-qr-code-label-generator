@@ -6,7 +6,7 @@ For what the project does, the label format and how to run the tests, see [READM
 ## Layout
 
 - `src/`: the package, plain ES modules and CSS that other sites install as a git dependency (`github:tmaier/asn-qr-code-label-generator#v2.x.y`) and import without a build. `package.json` `exports` and `files` define what they get; `uqr` is the only runtime dependency. No `prepare`/`postinstall` script: installing from git must not need a build.
-  - `labels.js`: pure label logic, no DOM: `labelText`, `parseCount`, `sheet` (189 labels, row by row), `qrSvg`/`qrDataUri` (QR symbol via uqr, error correction L, viewBox exactly the symbol without quiet zone, so the CSS size of the `<img>` is the symbol size), `fromQuery`/`toQuery`, `DEFAULTS`, `COLUMNS`/`ROWS`/`PER_SHEET`.
+  - `labels.js`: pure label logic, no DOM: `labelText` (the QR content), `displayText` (the printed text, without the prefix if `hidePrefix`), `parseCount`, `sheet` (189 labels, row by row, each `{ code, text, col, row }`), `nextSheetStart`, `qrSvg`/`qrDataUri` (QR symbol via uqr, error correction L, viewBox exactly the symbol without quiet zone, so the CSS size of the `<img>` is the symbol size), `fromQuery`/`toQuery`, `DEFAULTS`, `COLUMNS`/`ROWS`/`PER_SHEET`.
   - `asn.css`: sheet geometry and print rules (`@page { size: A4; margin: 0 }`). Only rules every consumer needs; nothing that hides a particular site's chrome.
   - `component.js`: `asnLabels(options)`, the Alpine data object (does not import Alpine). Number fields are strings; `labels` is a getter; the query string wins over localStorage (`storageKey`, default `asn-labels-v1`, `null` disables it). `fitTexts()` shrinks label texts that are too wide, within `this.$root`.
   - `index.js`: re-exports both.
@@ -26,7 +26,7 @@ The Avery L4731 geometry (shared by every L4731REV-xx pack size) exists in three
 
 ## Testing
 
-Tool versions and tasks live in `mise.toml` (see README.md); CI runs the same tasks (`build`, then `test`) via `jdx/mise-action`. `mise run test` builds `dist/` first. The tests live in `tests/`: unit tests for `src/` (`labels.test.mjs`, `component.test.mjs`) and print tests against `dist/index.html`, which `tests/lib/print.mjs` serves together with the files next to it. Artifacts land in `test-results/` (git-ignored). The negative control in `tests/print-geometry.test.mjs` edits `--sheet-margin-left` in `src/asn.css` and serves that in place of `dist/asn.css`; update it when that declaration changes.
+Tool versions and tasks live in `mise.toml` (see README.md); CI runs the same tasks (`build`, then `test`) via `jdx/mise-action`. `mise run test` builds `dist/` first. The tests live in `tests/`: unit tests for `src/` (`labels.test.mjs`, `component.test.mjs`), a test of the standalone page's controls (`standalone.test.mjs`) and print tests against `dist/index.html`, which `tests/lib/print.mjs` serves together with the files next to it. Artifacts land in `test-results/` (git-ignored). The negative control in `tests/print-geometry.test.mjs` edits `--sheet-margin-left` in `src/asn.css` and serves that in place of `dist/asn.css`; update it when that declaration changes.
 
 ## Code Style
 

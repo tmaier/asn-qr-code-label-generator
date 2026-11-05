@@ -54,7 +54,9 @@
           To use this tool, enter the start number, prefix, and number of
           leading zeros. The labels below update as you type. You can then
           print the labels by clicking the "Print Labels" button. "Next Sheet"
-          moves the start number on by one sheet for the next print run.
+          moves the start number on by one sheet for the next print run. "Hide
+          Prefix in Label Text" prints only the number on each label, while the
+          QR code keeps the prefix.
         </p>
 
         <p>
@@ -164,6 +166,31 @@
                 class="prose prose-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 max-w-none"
               >
                 This may be useful for debugging or to calibrate the print out.
+              </p>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-start">
+              <div class="flex h-5 items-center">
+                <input
+                  type="checkbox"
+                  id="hidePrefix"
+                  x-model="hidePrefix"
+                  class="focus:ring-3 h-4 w-4 rounded border border-gray-300 bg-gray-50 focus:ring-blue-300"
+                />
+              </div>
+              <label
+                for="hidePrefix"
+                class="ms-2 text-sm font-medium text-gray-900"
+                >Hide Prefix in Label Text</label
+              >
+            </div>
+            <div class="mt-1">
+              <p
+                class="prose prose-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 max-w-none"
+              >
+                Prints only the number next to the QR code. The QR code still
+                contains the prefix, so Paperless-ngx reads the full ASN.
               </p>
             </div>
           </div>

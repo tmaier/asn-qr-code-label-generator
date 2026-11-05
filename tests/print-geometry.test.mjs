@@ -60,6 +60,11 @@ const CASES = [
     name: "custom-prefix",
     params: { ...APP_DEFAULTS, prefix: "Archiv-" },
   },
+  {
+    // Number alone on the label; the QR code still scans as prefix + number.
+    name: "hide-prefix",
+    params: { ...APP_DEFAULTS, hidePrefix: true },
+  },
 ];
 let browser;
 before(async () => {
