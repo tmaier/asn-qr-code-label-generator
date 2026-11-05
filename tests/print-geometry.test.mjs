@@ -31,14 +31,19 @@ const TOLERANCE = Number(process.env.ASN_TOLERANCE_MM || 0.3);
 const LIVE_QR = process.env.ASN_LIVE_QR === "1";
 const target = resolveTarget();
 
+// The generator's defaults, used when the URL has no parameters.
+const APP_DEFAULTS = { startNumber: 1, prefix: "ASN", leadingZeros: 3, borderToggle: false };
+
 const CASES = [
   {
+    // No URL parameters: checks the defaults the page starts with.
     name: "default",
-    params: { startNumber: 1, prefix: "ASN", leadingZeros: 4, borderToggle: false },
+    params: {},
+    labels: APP_DEFAULTS,
   },
   {
     name: "with-border",
-    params: { startNumber: 1, prefix: "ASN", leadingZeros: 4, borderToggle: true },
+    params: { ...APP_DEFAULTS, borderToggle: true },
   },
   {
     // Crosses 9999999 -> 10000000: the text grows by a digit mid-sheet.
@@ -53,7 +58,7 @@ const CASES = [
   {
     // Lower case forces the QR code into byte mode (more modules).
     name: "custom-prefix",
-    params: { startNumber: 1, prefix: "Archiv-", leadingZeros: 4, borderToggle: false },
+    params: { ...APP_DEFAULTS, prefix: "Archiv-" },
   },
 ];
 let browser;
@@ -76,7 +81,7 @@ for (const c of CASES) {
     });
     const result = compareWithSheet(await readPdf(pdfBytes), {
       tolerance: TOLERANCE,
-      labels: c.params,
+      labels: c.labels ?? c.params,
     });
 
     const dir = path.join(OUT, c.name);
@@ -125,7 +130,7 @@ for (const c of CASES.filter((c) => !c.params.borderToggle)) {
   test(`every QR code scans as its label text (${c.name})`, async () => {
     const decoded = await scanLabels(browser, { target, params: c.params, liveQr: LIVE_QR });
     const wrong = decoded
-      .map((got, i) => ({ i, got, want: expectedText(c.params, i) }))
+      .map((got, i) => ({ i, got, want: expectedText(c.labels ?? c.params, i) }))
       .filter(({ got, want }) => got !== want);
     assert.deepEqual(
       wrong.slice(0, 10).map(({ i, got, want }) => `label #${i + 1}: scanned ${JSON.stringify(got)}, expected "${want}"`),
@@ -144,7 +149,7 @@ test(
     const marker = "--sheet-margin-left: 8.467mm";
     assert.ok(target.html.includes(marker), `index.html no longer contains "${marker}"; update this test`);
     const broken = { ...target, html: target.html.replace(marker, "--sheet-margin-left: 9.467mm") };
-    const params = CASES[0].params;
+    const params = APP_DEFAULTS;
     const result = compareWithSheet(
       await readPdf(await printToPdf(browser, { target: broken, params, liveQr: false })),
       { tolerance: TOLERANCE, labels: params },

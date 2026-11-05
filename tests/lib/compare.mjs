@@ -22,6 +22,11 @@ function union(boxes) {
 // (the modules); their union per label is the symbol. Raster QR codes
 // (e.g. PNG) arrive as images, whose box includes any quiet zone.
 function qrSymbols(page, cells, problems) {
+  if (!page.darkPaths.length && page.images.length) {
+    problems.push(
+      "QR codes are printed as raster images; the symbol's edges inside the image can't be verified (expected SVG)",
+    );
+  }
   const shapes = page.darkPaths.length ? page.darkPaths : page.images;
   const byCell = new Map();
   for (const s of shapes) {

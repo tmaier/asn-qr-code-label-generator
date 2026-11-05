@@ -21,6 +21,8 @@
        * tests/lib/avery-l4731rev-25.mjs and the table in README.md.
        */
       :root {
+        --columns: 7;
+        --rows: 27;
         --sheet-width: 210mm;
         --sheet-margin-top: 13.5mm;
         --sheet-margin-left: 8.467mm; /* 1/3 in */
@@ -48,15 +50,26 @@
           var(--sheet-margin-left);
       }
 
+      /*
+       * Every label is placed from its own row and column instead of by a
+       * grid: browsers round each 10 mm row to layout units (1/64 px), and in
+       * a grid that rounding adds up to 0.1 mm over 27 rows.
+       */
       .asn-labels {
-        display: grid;
-        grid-template-columns: repeat(7, var(--label-width));
-        grid-auto-rows: var(--label-height);
-        column-gap: var(--label-gap-x);
+        position: relative;
+        width: calc(
+          var(--columns) * var(--label-width) + (var(--columns) - 1) *
+            var(--label-gap-x)
+        );
+        height: calc(var(--rows) * var(--label-height));
       }
 
       .asn-label {
-        position: relative;
+        position: absolute;
+        left: calc(var(--col) * (var(--label-width) + var(--label-gap-x)));
+        top: calc(var(--row) * var(--label-height));
+        width: var(--label-width);
+        height: var(--label-height);
         border-radius: var(--label-radius);
       }
 
@@ -178,7 +191,6 @@
               required
               min="1"
               step="1"
-              value="1"
               class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
             />
             <div class="mt-1">
@@ -208,7 +220,6 @@
               x-model="prefix"
               @input="updateUrl()"
               required
-              value="ASN"
               class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
             />
             <div class="mt-1">
@@ -236,7 +247,6 @@
               x-model="leadingZeros"
               @input="updateUrl()"
               required
-              value="5"
               min="0"
               class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
             />
@@ -289,7 +299,10 @@
       <!-- Display QR Code Labels -->
       <ol class="asn-labels">
         <template x-for="label in labels">
-          <li class="asn-label">
+          <li
+            class="asn-label"
+            :style="{ '--col': label.col, '--row': label.row }"
+          >
             <img
               :src="label.qrCodeUrl"
               alt=""
@@ -333,7 +346,7 @@
         return {
           startNumber: 1,
           prefix: "ASN",
-          leadingZeros: 4,
+          leadingZeros: 3,
           borderToggle: false,
           labels: [],
 
@@ -367,7 +380,11 @@
 
           generateLabels() {
             this.labels = [];
-            let totalLabels = 7 * 27; // 7 columns x 27 rows
+            // Sheet layout from the CSS custom properties (one source).
+            const css = getComputedStyle(document.documentElement);
+            const columns = parseInt(css.getPropertyValue("--columns"), 10);
+            const rows = parseInt(css.getPropertyValue("--rows"), 10);
+            let totalLabels = columns * rows;
             let startNumberInt = parseInt(this.startNumber, 10); // Ensure startNumber is an integer
             let leadingZerosInt = parseInt(this.leadingZeros, 10); // Ensure leadingZeros is an integer
             for (let i = 0; i < totalLabels; i++) {
@@ -383,7 +400,12 @@
                 text
               )}`;
 
-              this.labels.push({ qrCodeUrl, text });
+              this.labels.push({
+                qrCodeUrl,
+                text,
+                col: i % columns,
+                row: Math.floor(i / columns),
+              });
             }
             this.$nextTick(() => this.fitTexts());
           },

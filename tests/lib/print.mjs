@@ -53,9 +53,16 @@ export async function openGenerator(browser, { target, params = {}, liveQr, page
     );
   }
   if (!liveQr) {
-    await page.route("https://api.qrserver.com/**", (route) => {
-      const data = new URL(route.request().url()).searchParams.get("data");
-      route.fulfill({ contentType: "image/svg+xml", body: qrSvg(data) });
+    // Answer like the real API: SVG only when the page asks for it.
+    await page.route("https://api.qrserver.com/**", async (route) => {
+      const params = new URL(route.request().url()).searchParams;
+      const data = params.get("data");
+      if (params.get("format") === "svg") {
+        await route.fulfill({ contentType: "image/svg+xml", body: qrSvg(data) });
+      } else {
+        const png = await QRCode.toBuffer(data, { errorCorrectionLevel: "L", margin: 1, width: 300 });
+        await route.fulfill({ contentType: "image/png", body: png });
+      }
     });
   }
 

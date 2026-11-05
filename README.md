@@ -46,11 +46,12 @@ The ASN text fills the space to the right of the QR code and shrinks to fit long
 
 `mise run test` checks what the browser prints against the label format above:
 
+- It reads the print layout of every label and QR code from the browser and compares it with the reference sheet to ±0.01 mm.
 - It prints the page to PDF in Chromium, as Chrome's "Save as PDF" does, and compares every printed QR symbol and label text with the reference sheet: one page, 189 labels, positions, sizes, rounded corners, and the right number on each label.
 - It renders the sheet, cuts out every label along its die-cut shape and scans each QR code with zxing-cpp, the decoder behind Paperless-ngx's ZXING barcode scanner.
 - It checks the reference sheet against Avery's designer export.
 
-Any deviation beyond the tolerance (default ±0.3 mm per edge) fails the run with a non-zero exit code.
+Any deviation beyond the tolerance fails the run with a non-zero exit code. The printed PDF gets ±0.3 mm per edge by default, because Chromium snaps printed content to whole CSS pixels (0.265 mm).
 
 [mise](https://mise.jdx.dev) provides Node.js (see `mise.toml`) and the tasks; each task installs the npm packages and Playwright Chromium first when needed.
 
