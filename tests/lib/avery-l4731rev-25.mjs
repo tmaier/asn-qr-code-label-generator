@@ -1,6 +1,6 @@
 // Reference sheet for Avery L4731REV-25 (A4, 189 labels, 25.4 mm × 10 mm).
 // All values in millimetres, origin at the top-left corner of the page.
-// Keep in sync with the specification table in CLAUDE.md.
+// Keep in sync with index.html and the table in README.md.
 //
 // Source: Avery's own label designer (app.avery.co.uk, template L4731),
 // exported as tests/fixtures/avery-designer-l4731.pdf. Avery lays this sheet

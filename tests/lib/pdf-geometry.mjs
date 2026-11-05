@@ -72,7 +72,7 @@ async function extractPage(page) {
   const [x0, y0, x1, y1] = page.view;
   const heightPt = y1 - y0;
 
-  // Raster images (QR codes from older versions, as PNG) and dark filled
+  // Raster images (QR codes as PNG) and dark filled
   // vector paths (QR codes as SVG: the black modules).
   const images = [];
   const darkPaths = [];

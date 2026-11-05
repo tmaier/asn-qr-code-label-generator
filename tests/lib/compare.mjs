@@ -20,7 +20,7 @@ function union(boxes) {
 
 // QR symbols printed on a page. SVG QR codes arrive as dark vector paths
 // (the modules); their union per label is the symbol. Raster QR codes
-// (older versions) arrive as images, whose box includes any quiet zone.
+// (e.g. PNG) arrive as images, whose box includes any quiet zone.
 function qrSymbols(page, cells, problems) {
   const shapes = page.darkPaths.length ? page.darkPaths : page.images;
   const byCell = new Map();
