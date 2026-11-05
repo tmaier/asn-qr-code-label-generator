@@ -37,6 +37,14 @@ execFileSync(
   { cwd: ROOT, stdio: ["ignore", "ignore", "inherit"] },
 );
 
+// Keep Tailwind's license banner but without its homepage URL, so dist/
+// mentions no third-party host and a grep for CDNs stays clean.
+const appCss = path.join(DIST, "app.css");
+fs.writeFileSync(
+  appCss,
+  fs.readFileSync(appCss, "utf8").replace(/^(\/\*! tailwindcss v[^*]*MIT License) \| https:\/\/tailwindcss\.com \*\//, "$1 */"),
+);
+
 for (const f of fs.readdirSync(DIST)) {
   console.log(`dist/${f}  ${(fs.statSync(path.join(DIST, f)).size / 1024).toFixed(1)} kB`);
 }
