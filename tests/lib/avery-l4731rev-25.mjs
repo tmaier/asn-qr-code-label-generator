@@ -3,12 +3,16 @@
 // Keep in sync with index.html and the table in README.md.
 //
 // Source: Avery's own label designer (app.avery.co.uk, template L4731),
-// exported as tests/fixtures/avery-designer-l4731.pdf. Avery lays this sheet
-// out on an inch grid: 1 in wide labels, 1.1 in pitch, 1/3 in left margin.
-// The export's page is 596 × 842 pt (0.26 × 0.04 mm larger than A4), so the
-// top margin is taken as the symmetric 13.5 mm rather than the exported
-// 13.53 mm. tests/avery-reference.test.mjs checks these values against the
-// export.
+// exported as tests/fixtures/avery-designer-l4731.pdf. The designer mixes
+// units: across the sheet it uses inches (1 in labels, 0.1 in gaps, 1/3 in
+// left margin), down the sheet and for the corners millimetres (10 mm labels,
+// 2 mm radius). It rounds vertical positions to 1/20 pt, so its row pitch
+// alternates between 10.001 and 9.984 mm around an exact 10 mm. The export's
+// page is 596 × 842 pt (0.26 × 0.04 mm larger than A4), so the top margin is
+// taken as the symmetric 13.5 mm rather than the exported 13.53 mm.
+// tests/avery-reference.test.mjs checks these values against the export.
+
+const IN = 25.4; // mm
 
 export const SHEET = Object.freeze({
   name: "Avery L4731REV-25",
@@ -16,11 +20,11 @@ export const SHEET = Object.freeze({
   pageHeight: 297,
   columns: 7,
   rows: 27,
-  labelWidth: 25.4,
+  labelWidth: 1 * IN,
   labelHeight: 10,
   marginTop: 13.5,
-  marginLeft: 25.4 / 3, // 8.467 mm
-  pitchX: 27.94, // label width + 2.54 mm horizontal gap
+  marginLeft: IN / 3, // 8.467 mm
+  pitchX: 1.1 * IN, // 27.94 mm: label width + 0.1 in gap
   pitchY: 10, // labels touch vertically
   cornerRadius: 2, // die-cut labels have rounded corners
 });

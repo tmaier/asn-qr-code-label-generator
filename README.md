@@ -8,16 +8,17 @@ Live version: <https://tobiasmaier.info/asn-qr-code-label-generator/>
 ## Label format
 
 The generator prints on Avery L4731REV-25 ([UK shop](https://www.avery.co.uk/product/mini-multipurpose-labels-l4731rev-25), [DE shop](https://www.avery-zweckform.com/produkt/universal-etiketten-l4731rev-25)).
-The geometry comes from Avery's own label designer, which lays this sheet out on an inch grid (see [`tests/fixtures/README.md`](tests/fixtures/README.md)):
+The geometry comes from Avery's own label designer (see [`tests/fixtures/README.md`](tests/fixtures/README.md)).
+It measures across the sheet in inches and down the sheet in millimetres, and `index.html` uses the same units:
 
 | Dimension | Value |
 |-----------|-------|
 | Page | A4, 210 mm × 297 mm |
 | Grid | 7 columns × 27 rows (189 labels) |
-| Label size | 25.4 mm (1 in) × 10 mm, 2 mm corner radius |
+| Label size | 1 in (25.4 mm) × 10 mm, 2 mm corner radius |
 | Top/bottom margin | 13.5 mm |
-| Left/right margin | 8.467 mm (1/3 in) |
-| Horizontal gap / pitch | 2.54 mm (0.1 in) / 27.94 mm (1.1 in) |
+| Left/right margin | 1/3 in (8.467 mm) |
+| Horizontal gap / pitch | 0.1 in (2.54 mm) / 1.1 in (27.94 mm) |
 | Vertical gap / pitch | 0 mm (labels touch) / 10 mm |
 
 On each label, the QR symbol's corners sit exactly on the label's rounded corner arcs: 0.586 mm in from the edges, 8.828 mm square.

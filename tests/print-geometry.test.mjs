@@ -146,9 +146,9 @@ test(
   "detects a 1 mm left-margin error (negative control)",
   { skip: !target.html && "ASN_TARGET is a URL" },
   async () => {
-    const marker = "--sheet-margin-left: 8.467mm";
+    const marker = "--sheet-margin-left: calc(1in / 3)";
     assert.ok(target.html.includes(marker), `index.html no longer contains "${marker}"; update this test`);
-    const broken = { ...target, html: target.html.replace(marker, "--sheet-margin-left: 9.467mm") };
+    const broken = { ...target, html: target.html.replace(marker, "--sheet-margin-left: calc(1in / 3 + 1mm)") };
     const params = APP_DEFAULTS;
     const result = compareWithSheet(
       await readPdf(await printToPdf(browser, { target: broken, params, liveQr: false })),
