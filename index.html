@@ -14,6 +14,105 @@
       defer
     ></script>
     <style>
+      /*
+       * Avery L4731REV-25: 189 labels (7 × 27) of 25.4 mm × 10 mm on A4.
+       * Values from Avery's own label designer, in the units it uses: inches
+       * across the sheet, millimetres down it and for the corner radius
+       * (see tests/fixtures/README.md). Keep in sync with
+       * tests/lib/avery-l4731rev-25.mjs and the table in README.md.
+       */
+      :root {
+        --columns: 7;
+        --rows: 27;
+        --sheet-width: 210mm;
+        --sheet-margin-top: 13.5mm;
+        --sheet-margin-left: calc(1in / 3);
+        --label-width: 1in;
+        --label-height: 10mm;
+        --label-gap-x: 0.1in; /* pitch 1.1 in */
+        --label-radius: 2mm; /* die-cut corners */
+
+        /*
+         * The QR symbol's corners sit exactly on the label's corner arcs:
+         * inset r·(1 − 1/√2) from the edges, so the white space the QR code
+         * standard asks for around the symbol extends into the rounded
+         * corners and beyond the label instead of shrinking the symbol.
+         */
+        --qr-inset: calc(var(--label-radius) * (1 - 0.70710678));
+        --qr-size: calc(var(--label-height) - 2 * var(--qr-inset));
+        --text-left: calc(2 * var(--qr-inset) + var(--qr-size));
+        --text-right: var(--qr-inset);
+        --text-max-size: 3.9mm;
+      }
+
+      .asn-sheet {
+        width: var(--sheet-width);
+        padding: var(--sheet-margin-top) 0 var(--sheet-margin-top)
+          var(--sheet-margin-left);
+      }
+
+      /*
+       * Every label is placed from its own row and column instead of by a
+       * grid: browsers round each 10 mm row to layout units (1/64 px), and in
+       * a grid that rounding adds up to 0.1 mm over 27 rows.
+       */
+      .asn-labels {
+        position: relative;
+        width: calc(
+          var(--columns) * var(--label-width) + (var(--columns) - 1) *
+            var(--label-gap-x)
+        );
+        height: calc(var(--rows) * var(--label-height));
+      }
+
+      .asn-label {
+        position: absolute;
+        left: calc(var(--col) * (var(--label-width) + var(--label-gap-x)));
+        top: calc(var(--row) * var(--label-height));
+        width: var(--label-width);
+        height: var(--label-height);
+        border-radius: var(--label-radius);
+      }
+
+      .asn-label-qr {
+        position: absolute;
+        left: var(--qr-inset);
+        top: var(--qr-inset);
+        width: var(--qr-size);
+        height: var(--qr-size);
+      }
+
+      .asn-label-text {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: var(--text-left);
+        right: var(--text-right);
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+        font-size: var(--text-max-size);
+      }
+
+      /* "Show Border": outline the die-cut shape of every label. */
+      .asn-show-border .asn-label {
+        outline: 0.2mm solid rgb(59 130 246);
+        outline-offset: -0.2mm;
+      }
+      .asn-show-border .asn-label:nth-of-type(even) {
+        outline-color: rgb(252 165 165);
+      }
+
+      @media print {
+        .asn-sheet {
+          /* Let the page decide the width; the grid has fixed tracks. */
+          width: auto;
+          /* No bottom padding, so a page a hair short of 297 mm (Chromium
+             prints A4 as 297.01 × 209.89 mm) never spills onto page 2. */
+          padding-bottom: 0;
+        }
+      }
+
       @media print {
         /* See https://caniuse.com/css-paged-media */
         @page {
@@ -93,7 +192,6 @@
               required
               min="1"
               step="1"
-              value="1"
               class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
             />
             <div class="mt-1">
@@ -123,7 +221,6 @@
               x-model="prefix"
               @input="updateUrl()"
               required
-              value="ASN"
               class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
             />
             <div class="mt-1">
@@ -151,7 +248,6 @@
               x-model="leadingZeros"
               @input="updateUrl()"
               required
-              value="5"
               min="0"
               class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
             />
@@ -198,35 +294,26 @@
     </div>
 
     <div
-      class="container mx-auto w-[210mm] border px-[8.6mm] py-[13.5mm] print:w-full print:max-w-full print:border-0"
+      class="asn-sheet mx-auto border print:border-0"
+      :class="{'asn-show-border': borderToggle}"
     >
       <!-- Display QR Code Labels -->
-      <ol class="grid grid-cols-7 gap-x-[2.5mm]">
+      <ol class="asn-labels">
         <template x-for="label in labels">
-          <li class="h-[10mm] w-[25.4mm]">
-            <div
-              class="flex h-[9mm] w-[24.4mm] items-center border-[0.5mm] odd:border-blue-500 even:border-red-300"
-              :class="{'even:border-transparent odd:border-transparent': !borderToggle}"
-            >
-              <img
-                :src="label.qrCodeUrl"
-                alt=""
-                width="100"
-                height="100"
-                class="mr-[0.5mm] aspect-square h-[9mm] w-[9mm] flex-none"
-                referrerpolicy="no-referrer"
-              />
-              <div
-                class="flex-grow"
-                :class="{
-                'text-[3.9mm]': label.text.length <= 6,
-                'text-[3.2mm]': label.text.length == 7,
-                'text-[2.7mm]': label.text.length == 8,
-                'text-[2.4mm]': label.text.length == 9,
-                'text-[2.1mm]': label.text.length >= 10,
-              }"
-                x-text="label.text"
-              ></div>
+          <li
+            class="asn-label"
+            :style="{ '--col': label.col, '--row': label.row }"
+          >
+            <img
+              :src="label.qrCodeUrl"
+              alt=""
+              width="100"
+              height="100"
+              class="asn-label-qr"
+              referrerpolicy="no-referrer"
+            />
+            <div class="asn-label-text">
+              <span x-text="label.text"></span>
             </div>
           </li>
         </template>
@@ -260,7 +347,7 @@
         return {
           startNumber: 1,
           prefix: "ASN",
-          leadingZeros: 4,
+          leadingZeros: 3,
           borderToggle: false,
           labels: [],
 
@@ -294,7 +381,11 @@
 
           generateLabels() {
             this.labels = [];
-            let totalLabels = 7 * 27; // 7 columns x 27 rows
+            // Sheet layout from the CSS custom properties (one source).
+            const css = getComputedStyle(document.documentElement);
+            const columns = parseInt(css.getPropertyValue("--columns"), 10);
+            const rows = parseInt(css.getPropertyValue("--rows"), 10);
+            let totalLabels = columns * rows;
             let startNumberInt = parseInt(this.startNumber, 10); // Ensure startNumber is an integer
             let leadingZerosInt = parseInt(this.leadingZeros, 10); // Ensure leadingZeros is an integer
             for (let i = 0; i < totalLabels; i++) {
@@ -304,11 +395,34 @@
                 .padStart(leadingZerosInt + 1, "0");
               let text = this.prefix + paddedNumber;
               // See https://goqr.me/api/doc/create-qr-code/
-              let qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+              // SVG: vector output whose viewBox is exactly the symbol (no
+              // quiet zone), so the CSS size is the size of the symbol.
+              let qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?format=svg&data=${encodeURIComponent(
                 text
               )}`;
 
-              this.labels.push({ qrCodeUrl, text });
+              this.labels.push({
+                qrCodeUrl,
+                text,
+                col: i % columns,
+                row: Math.floor(i / columns),
+              });
+            }
+            this.$nextTick(() => this.fitTexts());
+          },
+          // Shrink each label text that is too wide for the space next to
+          // the QR code, so long numbers or prefixes never run off the label.
+          fitTexts() {
+            for (const box of document.querySelectorAll(".asn-label-text")) {
+              const text = box.firstElementChild;
+              box.style.fontSize = "";
+              const needed = text.getBoundingClientRect().width;
+              const available = box.getBoundingClientRect().width;
+              if (needed > available) {
+                box.style.fontSize = `calc(var(--text-max-size) * ${
+                  (available / needed) * 0.98
+                })`;
+              }
             }
           },
           printLabels() {

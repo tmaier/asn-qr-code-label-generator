@@ -1,46 +1,34 @@
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## Project Overview
-
-A browser-based QR code label generator for Paperless-ngx Archive Serial Numbers (ASN). The entire application is a single `index.html` file with no build process.
+For what the project does, the label format and how to run the tests, see [README.md](README.md).
 
 ## Development
 
-**No build tools required** - Open `index.html` directly in a browser or serve it with any static file server.
-
-The application uses CDN-hosted dependencies:
-- TailwindCSS (with forms and typography plugins)
-- AlpineJS 3.x
+The application is the single file `index.html`: no build step. Open it in a browser or serve it with any static file server. TailwindCSS (forms and typography plugins) and AlpineJS 3.x load from CDNs.
 
 ## Architecture
 
-Single-page application using AlpineJS for reactivity. Key structure in `index.html`:
+- **`qrCodeApp()`**: AlpineJS component holding all state and logic.
+  - `readUrlParams()` / `updateUrl()`: keep the form fields in the URL query string.
+  - `generateLabels()`: builds the 189 labels (7 × 27), each with an api.qrserver.com URL for an SVG QR code. The SVG's viewBox is exactly the symbol, without quiet zone, so the CSS size of the `<img>` is the symbol size.
+  - `fitTexts()`: shrinks a label text that is too wide for the space next to the QR code.
+  - `printLabels()`: opens the browser print dialog.
+- **Print styling**: `@page { size: A4; margin: 0 }`. The grid has fixed label-width tracks, so it does not depend on the page width the browser reports (Chromium prints A4 as 209.89 × 297.01 mm). The sheet has no bottom padding in print, so it fits on one page.
 
-- **`qrCodeApp()`** (line 255): AlpineJS component containing all application state and logic
-  - `generateLabels()`: Creates label data array with QR code URLs via external API (api.qrserver.com)
-  - `printLabels()`: Triggers browser print dialog
-  - Generates 189 labels per sheet (7 columns × 27 rows)
+## Label geometry
 
-- **Print styling**: Uses CSS `@page` rule for A4 paper with zero margins (requires Chrome/Chromium)
+The Avery L4731REV-25 geometry exists in three places. Change them together:
 
-- **Label format**: Hardcoded for Avery L4731REV-25 labels (see specifications below)
+1. `index.html`: CSS custom properties in the `<style>` block (`--sheet-margin-left`, `--label-gap-x`, `--label-radius`, …). `--qr-inset` and `--qr-size` derive from the radius: inset `r·(1 − 1/√2)`, size `label height − 2·inset`.
+2. `tests/lib/avery-l4731rev-25.mjs`: the reference sheet the tests compare against.
+3. The table in README.md.
 
-## Avery L4731REV-25 Label Specifications
+`tests/fixtures/avery-designer-l4731.pdf` (Avery's own designer export) is the source of truth. `mise run test` fails if the reference sheet drifts from it, and if the printed page drifts from the reference sheet.
 
-Page: A4 (210mm × 297mm)
+## Testing
 
-| Dimension | Value |
-|-----------|-------|
-| Label size | 25.4mm × 10mm |
-| Grid | 7 columns × 27 rows (189 labels) |
-| Top/Bottom margin | 13.5mm |
-| Left/Right margin | 8.6mm |
-| Horizontal gap | 2.5mm |
-| Vertical gap | 0mm (labels touch) |
-| Horizontal pitch | 27.9mm |
-| Vertical pitch | 10mm |
+Tool versions and tasks live in `mise.toml` (see README.md); CI runs the same tasks via `jdx/mise-action`. The tests live in `tests/`, and artifacts land in `test-results/` (git-ignored). The negative control in `tests/print-geometry.test.mjs` edits `--sheet-margin-left` in `index.html`; update it when that declaration changes.
 
 ## Code Style
 

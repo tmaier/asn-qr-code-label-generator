@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "QR code label generator for Paperless-ngx Archive Serial Numbers",
   "private": true,
-  "scripts": {
-    "generate-pdf": "node scripts/generate-pdf.js"
-  },
   "devDependencies": {
-    "playwright": "^1.60.0"
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^6.5.438",
+    "playwright": "^1.60.0",
+    "pngjs": "^7.0.0",
+    "qrcode": "^1.5.4",
+    "zxing-wasm": "^3.1.6"
   }
 }

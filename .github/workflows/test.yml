@@ -1,0 +1,50 @@
+name: Print geometry tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Page to test (empty = index.html of this commit, or a URL such as the live site)"
+        required: false
+        default: ""
+      tolerance_mm:
+        description: "Allowed deviation per label edge in mm (empty = test default)"
+        required: false
+        default: ""
+
+jobs:
+  print-geometry:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install tools from mise.toml
+        uses: jdx/mise-action@v5
+
+      - name: Cache npm packages and Playwright browsers
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-npm-playwright-${{ hashFiles('package-lock.json') }}
+
+      - name: Print to PDF and compare with Avery L4731REV-25
+        run: mise run test
+        env:
+          ASN_TARGET: ${{ inputs.target }}
+          ASN_TOLERANCE_MM: ${{ inputs.tolerance_mm }}
+
+      - name: Upload printed PDFs, overlays and reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: print-geometry-results
+          path: test-results/
+          retention-days: 30
