@@ -26,6 +26,9 @@ jobs:
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-npm-playwright-${{ hashFiles('package-lock.json') }}
 
+      - name: Build the standalone page into dist/
+        run: mise run build
+
       - name: Generate PDF
         run: mise run pdf
 

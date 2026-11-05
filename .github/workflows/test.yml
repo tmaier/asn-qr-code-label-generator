@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: "Page to test (empty = index.html of this commit, or a URL such as the live site)"
+        description: "Page to test (empty = dist/index.html built from this commit, or a URL such as the live site)"
         required: false
         default: ""
       tolerance_mm:
@@ -35,7 +35,10 @@ jobs:
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-npm-playwright-${{ hashFiles('package-lock.json') }}
 
-      - name: Print to PDF and compare with Avery L4731REV-25
+      - name: Build the standalone page into dist/
+        run: mise run build
+
+      - name: Unit tests, then print to PDF and compare with Avery L4731
         run: mise run test
         env:
           ASN_TARGET: ${{ inputs.target }}

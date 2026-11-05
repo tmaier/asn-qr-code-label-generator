@@ -1,0 +1,23 @@
+/*
+ * Styles of the standalone page (index.html), built into dist/app.css by
+ * `npm run build`. The label sheet itself is styled by asn.css.
+ */
+@import "tailwindcss" source(none);
+@source "../index.html";
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
+
+/* Tailwind v3 defaults the page was designed with. */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}

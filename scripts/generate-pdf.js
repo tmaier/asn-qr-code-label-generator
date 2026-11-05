@@ -1,70 +1,60 @@
-const { chromium } = require('playwright');
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+// Print the default label sheet of the built page (dist/) to asn-labels.pdf.
+//
+//   mise run pdf   (builds dist/ first)
 
-async function generatePDF() {
-  // Start a simple HTTP server to serve the HTML file
-  const htmlPath = path.join(__dirname, '..', 'index.html');
-  const htmlContent = fs.readFileSync(htmlPath, 'utf8');
+import fs from "node:fs";
+import http from "node:http";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { chromium } from "playwright";
 
-  const server = http.createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.end(htmlContent);
-  });
+const DIST = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "dist");
+const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css" };
 
-  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-  const port = server.address().port;
-  console.log(`Server started on port ${port}`);
-
-  const browser = await chromium.launch({
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage'
-    ]
-  });
-  const context = await browser.newContext();
-  const page = await context.newPage();
-
-  try {
-    // Load the page from local server and wait for network to settle
-    await page.goto(`http://127.0.0.1:${port}`, { waitUntil: 'networkidle' });
-
-    // Wait for AlpineJS to initialize and generate labels
-    console.log('Waiting for labels to be generated...');
-    await page.waitForFunction(() => {
-      const labels = document.querySelectorAll('ol li');
-      return labels.length === 189; // 7 columns x 27 rows
-    }, { timeout: 60000 });
-
-    console.log('Labels generated, waiting for QR code images to load...');
-
-    // Wait for all QR code images to load
-    await page.waitForFunction(() => {
-      const images = document.querySelectorAll('ol li img');
-      if (images.length === 0) return false;
-      return Array.from(images).every(img => img.complete && img.naturalHeight > 0);
-    }, { timeout: 120000 });
-
-    console.log('All images loaded, generating PDF...');
-
-    // Generate PDF with A4 format and print media
-    await page.pdf({
-      path: 'asn-labels.pdf',
-      format: 'A4',
-      printBackground: true,
-      margin: { top: 0, right: 0, bottom: 0, left: 0 }
-    });
-
-    console.log('PDF generated successfully: asn-labels.pdf');
-  } finally {
-    await browser.close();
-    server.close();
-  }
+if (!fs.existsSync(path.join(DIST, "index.html"))) {
+  console.error("dist/index.html not found; run `mise run build` first");
+  process.exit(1);
 }
 
-generatePDF().catch(err => {
-  console.error('Error generating PDF:', err);
-  process.exit(1);
+// Serve dist/ over HTTP, as a static file server would.
+const server = http.createServer((req, res) => {
+  let name = new URL(req.url, "http://localhost").pathname;
+  if (name === "/") name = "/index.html";
+  const file = path.join(DIST, path.normalize(name));
+  if (!file.startsWith(DIST + path.sep) || !fs.existsSync(file)) {
+    res.writeHead(404).end();
+    return;
+  }
+  res.writeHead(200, { "Content-Type": TYPES[path.extname(file)] ?? "application/octet-stream" });
+  res.end(fs.readFileSync(file));
 });
+await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+const { port } = server.address();
+
+const browser = await chromium.launch({
+  args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+});
+try {
+  const page = await browser.newPage();
+  await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "networkidle" });
+
+  console.log("Waiting for the labels and their QR codes...");
+  await page.waitForFunction(
+    () => {
+      const images = [...document.querySelectorAll("ol li img")];
+      return images.length === 189 && images.every((img) => img.complete && img.naturalWidth > 0);
+    },
+    null,
+    { timeout: 60_000 },
+  );
+
+  // Like the browser print dialog: the page's own @page size and margins.
+  await page.pdf({ path: "asn-labels.pdf", preferCSSPageSize: true, printBackground: true });
+  console.log("PDF generated: asn-labels.pdf");
+} catch (err) {
+  console.error("Error generating PDF:", err);
+  process.exitCode = 1;
+} finally {
+  await browser.close();
+  server.close();
+}
