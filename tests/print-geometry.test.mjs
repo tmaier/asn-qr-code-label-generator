@@ -1,10 +1,9 @@
 // Integration test: print the generator to PDF in Chromium and compare the
 // printed labels with the Avery L4731REV-25 reference sheet.
 //
-//   npm test
-//   ASN_TOLERANCE_MM=0.5 npm test                       # looser (default 0.3)
-//   ASN_TARGET=https://tobiasmaier.info/asn-qr-code-label-generator/ npm test
-//   ASN_LIVE_QR=1 npm test                              # real api.qrserver.com
+//   mise run test
+//   ASN_TOLERANCE_MM=0.5 mise run test                  # looser (default 0.3)
+//   mise run test:live                                  # live site, real QR API
 //
 // Printed PDFs, overlays with the reference sheet and JSON reports are
 // written to test-results/<case>/.
@@ -28,7 +27,7 @@ const OUT = path.join(ROOT, "test-results");
 // Allowed deviation per label edge. Chromium snaps printed content to whole
 // CSS pixels (0.265 mm), which causes up to about ±0.13 mm per edge and
 // 0.22 mm at the corner arcs; 0.3 mm leaves a little headroom above that.
-const TOLERANCE = Number(process.env.ASN_TOLERANCE_MM ?? 0.3);
+const TOLERANCE = Number(process.env.ASN_TOLERANCE_MM || 0.3);
 const LIVE_QR = process.env.ASN_LIVE_QR === "1";
 const target = resolveTarget();
 

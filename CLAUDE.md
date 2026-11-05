@@ -24,11 +24,11 @@ The Avery L4731REV-25 geometry exists in three places. Change them together:
 2. `tests/lib/avery-l4731rev-25.mjs`: the reference sheet the tests compare against.
 3. The table in README.md.
 
-`tests/fixtures/avery-designer-l4731.pdf` (Avery's own designer export) is the source of truth. `npm test` fails if the reference sheet drifts from it, and if the printed page drifts from the reference sheet.
+`tests/fixtures/avery-designer-l4731.pdf` (Avery's own designer export) is the source of truth. `mise run test` fails if the reference sheet drifts from it, and if the printed page drifts from the reference sheet.
 
 ## Testing
 
-`npm test` needs Node ≥ 22.13 and Playwright Chromium (`npx playwright install chromium`). The tests live in `tests/`, and artifacts land in `test-results/` (git-ignored). The negative control in `tests/print-geometry.test.mjs` edits `--sheet-margin-left` in `index.html`; update it when that declaration changes.
+Tool versions and tasks live in `mise.toml` (see README.md); CI runs the same tasks via `jdx/mise-action`. The tests live in `tests/`, and artifacts land in `test-results/` (git-ignored). The negative control in `tests/print-geometry.test.mjs` edits `--sheet-margin-left` in `index.html`; update it when that declaration changes.
 
 ## Code Style
 

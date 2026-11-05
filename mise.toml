@@ -1,0 +1,27 @@
+[tools]
+node = "26" # Active LTS
+
+[tasks.install]
+description = "Install npm packages and Playwright Chromium"
+sources = ["package.json", "package-lock.json"]
+outputs = ["node_modules/.package-lock.json"]
+run = [
+  "npm ci",
+  # On CI, also install the system libraries Chromium needs.
+  "npx playwright install ${CI:+--with-deps} chromium",
+]
+
+[tasks.test]
+description = "Print the page to PDF and compare it with the Avery L4731REV-25 reference sheet"
+depends = ["install"]
+run = "node --test --test-reporter=spec 'tests/*.test.mjs'"
+
+[tasks."test:live"]
+description = "Run the tests against the live site with the real QR code API"
+env = { ASN_TARGET = "https://tobiasmaier.info/asn-qr-code-label-generator/", ASN_LIVE_QR = "1" }
+run = "mise run test"
+
+[tasks.pdf]
+description = "Print the default label sheet to asn-labels.pdf"
+depends = ["install"]
+run = "node scripts/generate-pdf.js"

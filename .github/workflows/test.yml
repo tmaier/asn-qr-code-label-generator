@@ -12,9 +12,9 @@ on:
         required: false
         default: ""
       tolerance_mm:
-        description: "Allowed deviation per label edge in mm"
+        description: "Allowed deviation per label edge in mm (empty = test default)"
         required: false
-        default: "0.3"
+        default: ""
 
 jobs:
   print-geometry:
@@ -24,23 +24,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - name: Install tools from mise.toml
+        uses: jdx/mise-action@v5
+
+      - name: Cache npm packages and Playwright browsers
+        uses: actions/cache@v6
         with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
+          path: |
+            ~/.npm
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-npm-playwright-${{ hashFiles('package-lock.json') }}
 
       - name: Print to PDF and compare with Avery L4731REV-25
-        run: npm test
+        run: mise run test
         env:
           ASN_TARGET: ${{ inputs.target }}
-          ASN_TOLERANCE_MM: ${{ inputs.tolerance_mm || '0.3' }}
+          ASN_TOLERANCE_MM: ${{ inputs.tolerance_mm }}
 
       - name: Upload printed PDFs, overlays and reports
         if: always()

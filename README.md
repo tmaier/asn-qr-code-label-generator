@@ -44,7 +44,7 @@ The ASN text fills the space to the right of the QR code and shrinks to fit long
 
 ## Testing
 
-`npm test` checks what the browser prints against the label format above:
+`mise run test` checks what the browser prints against the label format above:
 
 - It prints the page to PDF in Chromium, as Chrome's "Save as PDF" does, and compares every printed QR symbol and label text with the reference sheet: one page, 189 labels, positions, sizes, rounded corners, and the right number on each label.
 - It renders the sheet, cuts out every label along its die-cut shape and scans each QR code with zxing-cpp, the decoder behind Paperless-ngx's ZXING barcode scanner.
@@ -52,11 +52,15 @@ The ASN text fills the space to the right of the QR code and shrinks to fit long
 
 Any deviation beyond the tolerance (default ±0.3 mm per edge) fails the run with a non-zero exit code.
 
+[mise](https://mise.jdx.dev) provides Node.js (see `mise.toml`) and the tasks; each task installs the npm packages and Playwright Chromium first when needed.
+
 ```sh
-npm ci && npx playwright install chromium
-npm test                                   # index.html of this checkout
-ASN_TOLERANCE_MM=0.5 npm test              # other tolerance in mm
-ASN_TARGET=https://tobiasmaier.info/asn-qr-code-label-generator/ ASN_LIVE_QR=1 npm test
+mise install                       # Node.js from mise.toml
+mise run test                      # index.html of this checkout
+ASN_TOLERANCE_MM=0.5 mise run test # other tolerance in mm
+mise run test:live                 # live site with the real QR code API
+mise run pdf                       # print the default sheet to asn-labels.pdf
+mise tasks                         # list all tasks
 ```
 
 | Variable | Effect |
