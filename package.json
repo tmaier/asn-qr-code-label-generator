@@ -40,5 +40,10 @@
     "build": "node scripts/build.js",
     "test": "node --test --test-reporter=spec \"tests/*.test.mjs\"",
     "pdf": "node scripts/generate-pdf.js"
+  },
+  "overrides": {
+    "@tailwindcss/typography": {
+      "postcss-selector-parser": "6.1.5"
+    }
   }
 }
