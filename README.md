@@ -35,6 +35,24 @@ The application currently has the following limitations:
 
 - **Simple Technology Stack**: The application is built using [TailwindCSS](https://tailwindcss.com) and [AlpineJS](https://alpinejs.dev). TailwindCSS provides utility-first CSS classes for styling, while AlpineJS offers reactive and declarative JavaScript for handling interactivity. This combination results in a comparatively lightweight and maintainable codebase.
 
+## Testing
+
+`npm test` prints the generator to PDF in Chromium (as Chrome's "Save as PDF" would), reads back where every QR code and label text landed, and compares it with the Avery L4731REV-25 reference sheet taken from Avery's own label designer (label size, rounded corners, margins, pitch, 189 labels on one A4 page).
+It also renders the sheet, cuts out every label along its die-cut shape and scans each QR code with zxing-cpp (the decoder behind Paperless-ngx's ZXING scanner).
+Any deviation beyond the tolerance fails the run with a non-zero exit code.
+
+```sh
+npm ci && npx playwright install chromium
+npm test                                   # index.html of this checkout, ±0.3 mm
+ASN_TOLERANCE_MM=0.5 npm test              # looser tolerance per label edge (default 0.3)
+ASN_TARGET=https://tobiasmaier.info/asn-qr-code-label-generator/ ASN_LIVE_QR=1 npm test
+```
+
+For each case, `test-results/<case>/` contains the printed PDF, an `overlay.pdf` with the reference sheet drawn on top (red = deviating label), and a `report.json` with per-label deviations.
+By default the QR code API is replaced by an offline generator with the same SVG output; `ASN_LIVE_QR=1` uses the real API.
+
+These tests check the browser output, not your printer: do a physical test print (at 100 % scale) before printing many sheets.
+
 ## Contributions
 
 Contributions to this project are welcome.
