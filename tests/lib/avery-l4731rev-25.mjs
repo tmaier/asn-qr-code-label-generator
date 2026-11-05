@@ -1,6 +1,7 @@
-// Reference sheet for Avery L4731REV-25 (A4, 189 labels, 25.4 mm × 10 mm).
+// Reference sheet for Avery L4731 (A4, 189 labels, 25.4 mm × 10 mm), shared
+// by every L4731REV-xx pack size such as L4731REV-25.
 // All values in millimetres, origin at the top-left corner of the page.
-// Keep in sync with index.html and the table in README.md.
+// Keep in sync with src/asn.css and the table in README.md.
 //
 // Source: Avery's own label designer (app.avery.co.uk, template L4731),
 // exported as tests/fixtures/avery-designer-l4731.pdf. The designer mixes
@@ -15,7 +16,7 @@
 const IN = 25.4; // mm
 
 export const SHEET = Object.freeze({
-  name: "Avery L4731REV-25",
+  name: "Avery L4731",
   pageWidth: 210,
   pageHeight: 297,
   columns: 7,
@@ -33,7 +34,7 @@ export const SHEET = Object.freeze({
 // zone) inside a label: its corners sit exactly on the label's corner arcs,
 // i.e. inset r·(1 − 1/√2) from the edges, and it spans the label height
 // minus that inset on both sides. Mirrors --qr-inset / --qr-size in
-// index.html.
+// src/asn.css.
 const QR_INSET = SHEET.cornerRadius * (1 - Math.SQRT1_2);
 export const QR_IN_LABEL = Object.freeze({
   x: QR_INSET,
