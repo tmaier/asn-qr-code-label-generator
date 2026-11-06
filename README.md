@@ -5,6 +5,15 @@ It prints one sheet of 189 labels per run.
 
 Live version: <https://tobiasmaier.info/asn-qr-code-label-generator/>
 
+## How the labels are used
+
+1. Stick a label on each paper document you keep, before you scan it.
+2. Scan the document. With [`PAPERLESS_CONSUMER_ENABLE_ASN_BARCODE`](https://docs.paperless-ngx.com/configuration/#PAPERLESS_CONSUMER_ENABLE_ASN_BARCODE) enabled, Paperless-ngx reads the QR code while it consumes the scan and sets the document's ASN.
+3. File the paper in a binder in ASN order. The ASN in Paperless-ngx tells you where the original is.
+
+Documents you don't keep need no label: scan them and shred them.
+The blog post ["How I over-engineered my private document management system"](https://tobiasmaier.info/posts/2026/11/05/over-engineered-document-management.html) describes this workflow as part of a full Paperless-ngx setup, and how this generator came about.
+
 ## Label format
 
 The generator prints on Avery L4731, for example L4731REV-25 ([UK shop](https://www.avery.co.uk/product/mini-multipurpose-labels-l4731rev-25), [DE shop](https://www.avery-zweckform.com/produkt/universal-etiketten-l4731rev-25)).
@@ -28,8 +37,7 @@ The ASN text fills the space to the right of the QR code and shrinks to fit long
 
 ## Printing
 
-- Use Google Chrome or another Chromium-based browser, such as Microsoft Edge. Firefox works partially.
-  The page sets size and margins with the [CSS `@page` rule](https://developer.mozilla.org/en-US/docs/Web/CSS/@page).
+- Print from a desktop browser. On iPhone and iPad, every browser prints through WebKit's iOS print path: it lays the page out in the printer's printable area, minus a header and footer Safari adds, and ignores `@page` size and margins. The sheet then moves down and right and spills onto a second page.
 - Print at 100 % scale.
 - Do a test print on plain paper with "Show Border" switched on and hold it against a label sheet before printing many sheets.
 

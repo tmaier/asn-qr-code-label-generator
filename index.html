@@ -43,6 +43,20 @@
         </p>
 
         <p>
+          A typical workflow: stick a label on each paper document you keep,
+          scan it, and file the paper in a binder in
+          <abbr title="Archive Serial Number">ASN</abbr> order. Paperless-ngx
+          reads the QR code during consumption, so the
+          <abbr title="Archive Serial Number">ASN</abbr> in Paperless-ngx tells
+          you where the original is. The blog post
+          <a
+            href="https://tobiasmaier.info/posts/2026/11/05/over-engineered-document-management.html"
+            >How I over-engineered my private document management system</a
+          >
+          describes this workflow in a full Paperless-ngx setup.
+        </p>
+
+        <p>
           This tool generates QR code labels for the
           <abbr title="Archive Serial Number">ASN</abbr> feature. You can
           generate labels for up to 189 documents at once. The labels are
@@ -60,12 +74,9 @@
         </p>
 
         <p>
-          One <strong>known limitation of this tool</strong> is that it
-          <strong>only works on Google Chrome and possibly Firefox</strong>.
-          This is because it uses the
-          <a href="https://caniuse.com/css-paged-media"><code>@page</code></a>
-          CSS rule to control the page size, margin, and to turn off the default
-          header and footer of the browser.
+          <strong>Print from a desktop browser.</strong> On iPhone and iPad,
+          the printout ignores the page's size and margins, so the labels move
+          and spill onto a second page.
         </p>
       </div>
       <form @submit.prevent class="mb-8 print:hidden">
