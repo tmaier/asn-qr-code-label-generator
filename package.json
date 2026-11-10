@@ -33,7 +33,7 @@
     "pdfjs-dist": "^6.5.438",
     "playwright": "^1.62.1",
     "pngjs": "^7.0.0",
-    "tailwindcss": "^4.3.4",
+    "tailwindcss": "^4.3.5",
     "zxing-wasm": "^3.1.6"
   },
   "scripts": {
