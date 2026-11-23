@@ -34,7 +34,7 @@
     "playwright": "^1.65.1",
     "pngjs": "^7.0.0",
     "tailwindcss": "^4.3.5",
-    "zxing-wasm": "^3.1.6"
+    "zxing-wasm": "^3.1.7"
   },
   "scripts": {
     "build": "node scripts/build.js",
